@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/Login";
-import PainelAdmin from "../pages/Admin";
+import PainelAdmin from "../pages/admin";
 import PainelLojista from "../pages/Lojista";
-import PainelFornecedor from "../pages/Fornecedor";
+import PainelFornecedor from "../pages/fornecedor";
 import { getUserType } from "../utils/mockAuth";
 
 const AppRoutes = () => {
