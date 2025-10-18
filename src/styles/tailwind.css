@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-dark-text;
+  }
+}
+
+@layer components {
+  .sidebar-item {
+    @apply flex items-center space-x-2 px-4 py-2 text-dark-text hover:bg-dark-surface rounded-lg transition-colors;
+  }
+
+  .sidebar-item.active {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .card {
+    @apply bg-dark-surface border border-dark-border rounded-lg p-4;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors;
+  }
+
+  .input-dark {
+    @apply bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-dark-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+}
