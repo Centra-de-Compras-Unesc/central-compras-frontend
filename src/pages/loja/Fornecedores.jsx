@@ -14,16 +14,16 @@ const fornecedoresMock = [
     id: 1,
     nome: "Krona",
     logo: "/logos/krona.png",
-    descricao: "Tubos, Conexões, Material Elétrico",
+    descricao: "Tubos, conexões e soluções completas para hidráulica",
     categoria: "Material Elétrico",
-    cashback: "0.5%",
+    cashback: "0,5%",
     pedidoMinimo: "R$ 1.000,00",
   },
   {
     id: 2,
     nome: "Quartzlit",
     logo: "/logos/quartzlit.png",
-    descricao: "Argamassas, Impermeabilizantes",
+    descricao: "Argamassas, rejuntes e soluções de impermeabilização",
     categoria: "Materiais de Construção",
     cashback: "1%",
     pedidoMinimo: "R$ 800,00",
@@ -32,9 +32,9 @@ const fornecedoresMock = [
     id: 3,
     nome: "Gerdau",
     logo: "/logos/gerdau.png",
-    descricao: "Vergalhões, Treliças, Malhas, Pregos",
+    descricao: "Vergalhões, treliças, malhas e linhas de aço especiais",
     categoria: "Ferragens",
-    cashback: "0.8%",
+    cashback: "0,8%",
     pedidoMinimo: "R$ 2.000,00",
   },
 ];
@@ -53,49 +53,58 @@ export default function Fornecedores() {
   });
 
   const handleVerProdutos = (fornecedor) => {
-    // Implementar navegação para a página de produtos do fornecedor
     console.log("Ver produtos do fornecedor:", fornecedor.nome);
   };
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Fornecedores</h1>
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Buscar fornecedores..."
-              value={termoBusca}
-              onChange={(e) => setTermoBusca(e.target.value)}
-              className="w-64 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
-            <svg
-              className="w-5 h-5 text-gray-400 absolute right-3 top-2.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
+    <div className="space-y-10 text-gray-200">
+      <header className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
+            Rede de fornecedores
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold text-white">
+            Catálogo inteligente por categoria
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-gray-400">
+            Explore os fornecedores homologados, com cashback automático e
+            condições comerciais personalizadas por estado.
+          </p>
         </div>
-      </div>
+        <div className="flex w-full max-w-md items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white shadow-inner lg:w-auto">
+          <svg
+            className="h-4 w-4 text-gray-500"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.6}
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M21 21l-4.35-4.35M5 11a6 6 0 1112 0 6 6 0 01-12 0z"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <input
+            type="text"
+            placeholder="Buscar por fornecedor ou solução"
+            value={termoBusca}
+            onChange={(e) => setTermoBusca(e.target.value)}
+            className="flex-1 bg-transparent text-sm text-white placeholder:text-gray-500 focus:outline-none"
+          />
+          <span className="rounded-full border border-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-gray-400">
+            {fornecedoresFiltrados.length.toString().padStart(2, "0")} encontrados
+          </span>
+        </div>
+      </header>
 
-      {/* Filtro por Categorias */}
-      <div className="mb-6 flex space-x-2 overflow-x-auto pb-2">
+      <div className="flex flex-wrap gap-3">
         <button
           onClick={() => setCategoriaAtiva("todos")}
-          className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
+          className={`rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] transition ${
             categoriaAtiva === "todos"
-              ? "bg-orange-500 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              ? "bg-gradient-to-r from-primary via-orange-500 to-amber-400 text-white shadow-[0_20px_45px_-20px_rgba(255,115,29,0.65)]"
+              : "border border-white/10 bg-white/5 text-gray-400 hover:text-white"
           }`}
         >
           Todos
@@ -104,10 +113,10 @@ export default function Fornecedores() {
           <button
             key={categoria.id}
             onClick={() => setCategoriaAtiva(categoria.nome)}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
+            className={`rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.2em] transition ${
               categoriaAtiva === categoria.nome
-                ? "bg-orange-500 text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ? "bg-gradient-to-r from-primary via-orange-500 to-amber-400 text-white shadow-[0_20px_45px_-20px_rgba(255,115,29,0.65)]"
+                : "border border-white/10 bg-white/5 text-gray-400 hover:text-white"
             }`}
           >
             {categoria.nome}
@@ -115,8 +124,7 @@ export default function Fornecedores() {
         ))}
       </div>
 
-      {/* Lista de Fornecedores */}
-      <div className="space-y-4">
+      <section className="grid gap-4">
         {fornecedoresFiltrados.map((fornecedor) => (
           <FornecedorCard
             key={fornecedor.id}
@@ -125,13 +133,30 @@ export default function Fornecedores() {
           />
         ))}
         {fornecedoresFiltrados.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">
-              Nenhum fornecedor encontrado com os filtros atuais.
-            </p>
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-white/10 bg-white/5 px-6 py-12 text-center text-sm text-gray-400">
+            <svg
+              className="mb-4 h-10 w-10 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M3 7h2l2 10h11l2-7H7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M16 17a2 2 0 11-4 0 2 2 0 014 0zm5-12h-2l-3.34-3.34A1 1 0 0015.59 1H8.41a1 1 0 00-.71.29L4.34 5H2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Nenhum fornecedor encontrado com os filtros atuais. Ajuste a busca
+            ou explore outra categoria.
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
