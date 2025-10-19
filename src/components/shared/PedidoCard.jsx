@@ -72,4 +72,3 @@ PedidoCard.propTypes = {
     previsaoEntrega: PropTypes.string,
   }).isRequired,
 };
-
