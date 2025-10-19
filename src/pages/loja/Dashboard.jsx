@@ -32,7 +32,8 @@ const campanhas = [
   {
     id: 1,
     titulo: "Campanha de Verão",
-    descricao: "Cashback extra de 10% em tintas premium para pedidos acima de R$ 5.000",
+    descricao:
+      "Cashback extra de 10% em tintas premium para pedidos acima de R$ 5.000",
     duracao: "Até 05/03/2024",
     fornecedor: "Quartzlit",
     destaque: "Cashback +10%",
@@ -98,10 +99,8 @@ const formatCurrency = (value) =>
   }).format(value);
 
 const statusStyles = {
-  Entregue:
-    "border border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
-  "Em andamento":
-    "border border-amber-500/20 bg-amber-500/10 text-amber-300",
+  Entregue: "border border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+  "Em andamento": "border border-amber-500/20 bg-amber-500/10 text-amber-300",
   Separado: "border border-blue-500/20 bg-blue-500/10 text-blue-300",
 };
 
@@ -232,7 +231,8 @@ export default function Dashboard() {
                       <td className="whitespace-nowrap px-6 py-4">
                         <span
                           className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
-                            statusStyles[pedido.status] || "border border-gray-500/20 bg-gray-500/10 text-gray-300"
+                            statusStyles[pedido.status] ||
+                            "border border-gray-500/20 bg-gray-500/10 text-gray-300"
                           }`}
                         >
                           <span className="h-1.5 w-1.5 rounded-full bg-current" />
@@ -303,7 +303,9 @@ export default function Dashboard() {
                     <p className="text-sm font-semibold text-white">
                       {fornecedor.nome}
                     </p>
-                    <p className="text-xs text-gray-400">{fornecedor.categoria}</p>
+                    <p className="text-xs text-gray-400">
+                      {fornecedor.categoria}
+                    </p>
                   </div>
                   <span className="inline-flex items-center rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-300">
                     {fornecedor.crescimento}

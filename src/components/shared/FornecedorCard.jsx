@@ -2,7 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 
 export default function FornecedorCard({ fornecedor, onVerProdutos }) {
-  const { nome, logo, descricao, categoria, cashback, pedidoMinimo } = fornecedor;
+  const { nome, logo, descricao, categoria, cashback, pedidoMinimo } =
+    fornecedor;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#14141B]/80 p-5 transition hover:border-orange-500/40 hover:shadow-[0_24px_60px_-30px_rgba(255,115,29,0.7)]">
@@ -11,11 +12,7 @@ export default function FornecedorCard({ fornecedor, onVerProdutos }) {
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
             {logo ? (
-              <img
-                src={logo}
-                alt={nome}
-                className="h-12 w-12 object-contain"
-              />
+              <img src={logo} alt={nome} className="h-12 w-12 object-contain" />
             ) : (
               <span className="text-sm font-semibold text-gray-400">
                 {nome.substring(0, 2)}
@@ -62,7 +59,11 @@ export default function FornecedorCard({ fornecedor, onVerProdutos }) {
               strokeWidth={1.6}
               viewBox="0 0 24 24"
             >
-              <path d="M5 12h14m0 0l-6-6m6 6l-6 6" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M5 12h14m0 0l-6-6m6 6l-6 6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
           <button className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-gray-400 transition hover:text-white">
@@ -74,7 +75,11 @@ export default function FornecedorCard({ fornecedor, onVerProdutos }) {
               strokeWidth={1.5}
               viewBox="0 0 24 24"
             >
-              <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+              <path
+                d="M9 5l7 7-7 7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
         </div>

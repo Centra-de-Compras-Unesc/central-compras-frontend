@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Login from "../pages/Login";
-import PainelAdmin from "../pages/admin";
-import PainelLojista from "../pages/Lojista";
-import PainelFornecedor from "../pages/fornecedor";
+import Login from "../pages/auth/Login";
+import AdminRoutes from "./AdminRoutes";
+import LojaRoutes from "./LojaRoutes";
+import FornecedorRoutes from "./FornecedorRoutes";
 import { getUserType } from "../utils/mockAuth";
 
 const AppRoutes = () => {
@@ -17,19 +17,19 @@ const AppRoutes = () => {
     );
   }
 
-  const routes = {
-    admin: <PainelAdmin />,
-    lojista: <PainelLojista />,
-    fornecedor: <PainelFornecedor />,
+  const homePathByType = {
+    admin: "/admin",
+    lojista: "/loja",
+    fornecedor: "/fornecedor",
   };
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={`/${userType}`} />} />
-      <Route path="/admin" element={routes.admin} />
-      <Route path="/lojista" element={routes.lojista} />
-      <Route path="/fornecedor" element={routes.fornecedor} />
-      <Route path="*" element={<Navigate to={`/${userType}`} />} />
+      <Route path="/" element={<Navigate to={homePathByType[userType]} />} />
+      <Route path="/admin/*" element={<AdminRoutes />} />
+      <Route path="/loja/*" element={<LojaRoutes />} />
+      <Route path="/fornecedor/*" element={<FornecedorRoutes />} />
+      <Route path="*" element={<Navigate to={homePathByType[userType]} />} />
     </Routes>
   );
 };

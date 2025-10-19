@@ -5,13 +5,14 @@ export function login(email, password) {
     "fornecedor@teste.com": "fornecedor",
   };
 
-  const tipo = tipos[email.toLowerCase()];
+  const safeEmail = email?.toLowerCase().trim();
+  const tipo = tipos[safeEmail];
   if (tipo && password === "123") {
     localStorage.setItem("tipoUsuario", tipo);
-    return true;
+    return tipo;
   }
 
-  return false;
+  return null;
 }
 
 export function getUserType() {
