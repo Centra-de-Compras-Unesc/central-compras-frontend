@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { login as mockLogin } from "../../utils/mockAuth";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -9,7 +9,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleSubmit = (e) => {
@@ -23,8 +22,6 @@ const Login = () => {
     // popular contexto e persistir email se marcado
     login({ nome: email });
     if (remember) localStorage.setItem("userEmail", email);
-    const homeByType = { admin: "/admin", lojista: "/loja", fornecedor: "/fornecedor" };
-    navigate(homeByType[tipo] ?? "/");
   };
 
   return (
@@ -94,25 +91,21 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-end">
-            <Link
-              to="/forgot-password"
-              className="text-sm text-primary hover:text-primary/90 transition-colors"
-            >
-              Esqueceu sua senha?
-            </Link>
-          </div>
-
           <div className="flex items-center justify-between text-sm text-gray-400">
             <label className="inline-flex items-center gap-2">
-              <input type="checkbox" className="accent-primary" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+              <input
+                type="checkbox"
+                className="accent-primary"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
               Lembrar email
             </label>
-            <div className="flex gap-2">
-              <button type="button" className="text-primary hover:text-primary/90" onClick={() => { setEmail("lojista@teste.com"); setPassword("123"); }}>Lojista</button>
-              <button type="button" className="text-primary hover:text-primary/90" onClick={() => { setEmail("admin@teste.com"); setPassword("123"); }}>Admin</button>
-              <button type="button" className="text-primary hover:text-primary/90" onClick={() => { setEmail("fornecedor@teste.com"); setPassword("123"); }}>Fornecedor</button>
-            </div>
+            <Link
+              to="/forgot-password"
+              className="text-sm text-primary hover:text-primary/90 transition-colors">
+              Esqueceu sua senha?
+            </Link>
           </div>
 
           <div>
