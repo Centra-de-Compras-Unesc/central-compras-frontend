@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { login as mockLogin } from "../../utils/mockAuth";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { IoEye, IoEyeOffSharp } from "react-icons/io5";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,18 +10,41 @@ const Login = () => {
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
   const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    const tipo = mockLogin(email, password);
-    if (!tipo) {
-      setError("Credenciais inválidas. Tente novamente.");
-      return;
+
+    try {
+      const response = await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          senha: password, // O backend espera "senha"
+          id_conta: 1, // Loja = 1, Fornecedor = 2, etc.
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Falha ao realizar login");
+      }
+
+      // ✅ Atualiza contexto global e salva token/email
+      login({ nome: email, token: data.token });
+      if (remember) localStorage.setItem("userEmail", email);
+
+      console.log("Login bem-sucedido:", data);
+
+      // ✅ Redireciona após login
+      navigate("/loja/dashboard", { replace: true });
+    } catch (err) {
+      console.error("Erro no login:", err);
+      setError(err.message);
     }
-    // popular contexto e persistir email se marcado
-    login({ nome: email });
-    if (remember) localStorage.setItem("userEmail", email);
   };
 
   return (
@@ -42,6 +65,7 @@ const Login = () => {
               {error}
             </div>
           )}
+
           <div className="space-y-5">
             <div>
               <label
@@ -52,7 +76,6 @@ const Login = () => {
               </label>
               <input
                 id="email"
-                name="email"
                 type="email"
                 required
                 value={email}
@@ -61,6 +84,7 @@ const Login = () => {
                 placeholder="Digite seu email"
               />
             </div>
+
             <div>
               <label
                 htmlFor="password"
@@ -71,21 +95,19 @@ const Login = () => {
               <div className="relative">
                 <input
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-lg text-dark-text placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors pr-10"
+                  className="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-lg text-dark-text placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary pr-10"
                   placeholder="Digite sua senha"
                 />
                 <button
                   type="button"
-                  aria-label="Mostrar senha"
                   onClick={() => setShowPassword((s) => !s)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-dark-text"
                 >
-                  {showPassword ? "🙈" : "👁️"}
+                  {showPassword ? <IoEyeOffSharp size={20} /> : <IoEye size={20} />}
                 </button>
               </div>
             </div>
@@ -103,19 +125,18 @@ const Login = () => {
             </label>
             <Link
               to="/forgot-password"
-              className="text-sm text-primary hover:text-primary/90 transition-colors">
+              className="text-sm text-primary hover:text-primary/90 transition-colors"
+            >
               Esqueceu sua senha?
             </Link>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              className="w-full flex justify-center py-3 px-4 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Entrar
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="w-full flex justify-center py-3 px-4 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Entrar
+          </button>
         </form>
       </div>
     </div>
