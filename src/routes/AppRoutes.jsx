@@ -1,37 +1,28 @@
+import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/auth/Login";
-import AdminRoutes from "./AdminRoutes";
-import LojaRoutes from "./LojaRoutes";
-import FornecedorRoutes from "./FornecedorRoutes";
-import { getUserType } from "../utils/mockAuth";
+import { lojaRoutes } from "./LojaRoutes";
+import { useAuth } from "../contexts/AuthContext";
 
-const AppRoutes = () => {
-  const userType = getUserType(); // retorna "admin", "lojista", "fornecedor" ou null
+export default function AppRoutes() {
+  const { user } = useAuth();
 
-  if (!userType) {
+  // 🔒 Se o usuário não estiver logado, vai direto pro login
+  if (!user) {
     return (
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
   }
 
-  const homePathByType = {
-    admin: "/admin",
-    lojista: "/loja",
-    fornecedor: "/fornecedor",
-  };
-
+  // 🟢 Se o usuário está logado, renderiza o conjunto de rotas da loja
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={homePathByType[userType]} />} />
-      <Route path="/admin/*" element={<AdminRoutes />} />
-      <Route path="/loja/*" element={<LojaRoutes />} />
-      <Route path="/fornecedor/*" element={<FornecedorRoutes />} />
-      <Route path="*" element={<Navigate to={homePathByType[userType]} />} />
+      <Route path="/" element={<Navigate to="/loja/dashboard" replace />} />
+      {lojaRoutes}
+      <Route path="*" element={<Navigate to="/loja/dashboard" replace />} />
     </Routes>
   );
-};
-
-export default AppRoutes;
+}
