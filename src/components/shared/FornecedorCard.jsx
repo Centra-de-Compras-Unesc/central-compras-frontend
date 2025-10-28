@@ -1,9 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-export default function FornecedorCard({ fornecedor, onVerProdutos }) {
-  const { nome, logo, descricao, categoria, cashback, pedidoMinimo } =
-    fornecedor;
+export default function FornecedorCard({ fornecedor, onVerProdutos, onContatoRapido }) {
+  const { nome, logo, descricao, categoria, cashback, pedidoMinimo, telefone } = fornecedor;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#14141B]/80 p-5 transition hover:border-orange-500/40 hover:shadow-[0_24px_60px_-30px_rgba(255,115,29,0.7)]">
@@ -14,9 +13,7 @@ export default function FornecedorCard({ fornecedor, onVerProdutos }) {
             {logo ? (
               <img src={logo} alt={nome} className="h-12 w-12 object-contain" />
             ) : (
-              <span className="text-sm font-semibold text-gray-400">
-                {nome.substring(0, 2)}
-              </span>
+              <span className="text-sm font-semibold text-gray-400">{nome.substring(0, 2)}</span>
             )}
           </div>
           <div>
@@ -66,7 +63,12 @@ export default function FornecedorCard({ fornecedor, onVerProdutos }) {
               />
             </svg>
           </button>
-          <button className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-gray-400 transition hover:text-white">
+          
+          {/* Botão Contato rápido com funcionalidade */}
+          <button
+            onClick={() => onContatoRapido(fornecedor)}  // Passa a função para redirecionar para o WhatsApp
+            className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-gray-400 transition hover:text-white"
+          >
             Contato rápido
             <svg
               className="h-3.5 w-3.5"
@@ -96,6 +98,8 @@ FornecedorCard.propTypes = {
     categoria: PropTypes.string,
     cashback: PropTypes.string,
     pedidoMinimo: PropTypes.string,
+    telefone: PropTypes.string,  // Garantir que telefone existe no fornecedor
   }).isRequired,
   onVerProdutos: PropTypes.func.isRequired,
+  onContatoRapido: PropTypes.func.isRequired,  // Adicionando a prop de Contato rápido
 };
