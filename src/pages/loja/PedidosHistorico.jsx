@@ -1,4 +1,5 @@
-﻿import React, { useState } from "react";
+﻿import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import PedidoCard from "../../components/shared/PedidoCard";
 
 const STATUS_PEDIDOS = [
@@ -41,6 +42,23 @@ export default function PedidosHistorico() {
   const [statusAtivo, setStatusAtivo] = useState("todos");
   const [termoBusca, setTermoBusca] = useState("");
   const [pedidoSelecionado, setPedidoSelecionado] = useState(null);
+  const [isBrowser, setIsBrowser] = useState(false);
+
+  useEffect(() => {
+    setIsBrowser(true);
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined" || !pedidoSelecionado) return undefined;
+
+    const { style } = document.body;
+    const previousOverflow = style.overflow;
+    style.overflow = "hidden";
+
+    return () => {
+      style.overflow = previousOverflow;
+    };
+  }, [pedidoSelecionado]);
 
   const formatarMoeda = (valor) =>
     typeof valor === "number"
@@ -53,8 +71,7 @@ export default function PedidosHistorico() {
     const matchStatus =
       statusAtivo === "todos" ||
       pedido.status.toLowerCase() === statusAtivo ||
-      (statusAtivo === "separacao" &&
-        pedido.status.toLowerCase() === "em separacao");
+      (statusAtivo === "separacao" && pedido.status.toLowerCase() === "em separacao");
     const matchBusca =
       pedido.numero.toLowerCase().includes(termoBusca.toLowerCase()) ||
       pedido.fornecedor.toLowerCase().includes(termoBusca.toLowerCase());
@@ -150,150 +167,120 @@ export default function PedidosHistorico() {
         )}
       </section>
 
-      {pedidoSelecionado && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-md"
-            onClick={fecharModal}
-            aria-hidden="true"
-          />
-          <div
-            className="relative w-full max-w-3xl rounded-3xl border border-white/10 bg-dark-surface p-6 shadow-2xl"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="detalhes-pedido-titulo"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
+      {isBrowser &&
+        pedidoSelecionado &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4">
+            <div
+              className="absolute inset-0 bg-black/60 backdrop-blur-lg"
               onClick={fecharModal}
-              className="absolute right-5 top-5 rounded-full border border-white/10 bg-white/5 p-2 text-gray-400 transition hover:text-white"
-              aria-label="Fechar detalhes do pedido"
+              aria-hidden="true"
+            />
+            <div
+              className="relative w-full max-w-3xl rounded-3xl border border-white/10 bg-dark-surface p-6 shadow-2xl"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="detalhes-pedido-titulo"
+              onClick={(event) => event.stopPropagation()}
             >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.6}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M6 18L18 6M6 6l12 12"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-
-            <header className="mb-6 space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
-                Detalhes do pedido
-              </p>
-              <h2
-                id="detalhes-pedido-titulo"
-                className="text-2xl font-semibold text-white"
-              >
-                Pedido #{pedidoSelecionado.numero}
-              </h2>
-              <p className="text-sm text-gray-400">
-                Em {pedidoSelecionado.data} com fornecedor{" "}
-                {pedidoSelecionado.fornecedor}. Status{" "}
-                <span className="font-medium text-white">
-                  {pedidoSelecionado.status}
-                </span>
-                .
-              </p>
-            </header>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
-                  Fornecedor
-                </p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  {pedidoSelecionado.fornecedor}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
-                  Previsao entrega
-                </p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  {pedidoSelecionado.previsaoEntrega ?? "Nao informado"}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
-                  Valor total
-                </p>
-                <p className="mt-2 text-lg font-semibold text-white">
-                  {formatarMoeda(pedidoSelecionado.valorTotal)}
-                </p>
-              </div>
-            </div>
-
-            <section className="mt-6">
-              <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-gray-400">
-                Itens do pedido
-              </h3>
-              <div className="mt-3 overflow-hidden rounded-2xl border border-white/10">
-                <table className="min-w-full divide-y divide-white/10 text-sm text-gray-200">
-                  <thead className="bg-white/5 text-xs uppercase tracking-[0.25em] text-gray-400">
-                    <tr>
-                      <th className="px-4 py-3 text-left font-medium">
-                        Produto
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium">
-                        Quantidade
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium">
-                        Valor unitario
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium">
-                        Subtotal
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {(pedidoSelecionado.itens ?? []).map((item) => (
-                      <tr key={item.id} className="bg-white/[0.03]">
-                        <td className="px-4 py-3 font-medium text-white">
-                          {item.produto}
-                        </td>
-                        <td className="px-4 py-3">{item.quantidade}</td>
-                        <td className="px-4 py-3">
-                          {formatarMoeda(item.valorUnitario)}
-                        </td>
-                        <td className="px-4 py-3 font-medium text-white">
-                          {formatarMoeda(item.quantidade * item.valorUnitario)}
-                        </td>
-                      </tr>
-                    ))}
-                    {(pedidoSelecionado.itens ?? []).length === 0 && (
-                      <tr>
-                        <td
-                          colSpan="4"
-                          className="px-4 py-6 text-center text-sm text-gray-400"
-                        >
-                          Nenhum item cadastrado para este pedido.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <footer className="mt-6 flex justify-end">
               <button
                 onClick={fecharModal}
-                className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-gray-300 transition hover:border-white/20 hover:text-white"
+                className="absolute right-5 top-5 rounded-full border border-white/10 bg-white/5 p-2 text-gray-400 transition hover:text-white"
+                aria-label="Fechar detalhes do pedido"
               >
-                Fechar
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.6}
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </button>
-            </footer>
-          </div>
-        </div>
-      )}
+
+              <header className="mb-6 space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
+                  Detalhes do pedido
+                </p>
+                <h2 id="detalhes-pedido-titulo" className="text-2xl font-semibold text-white">
+                  Pedido #{pedidoSelecionado.numero}
+                </h2>
+                <p className="text-sm text-gray-400">
+                  Em {pedidoSelecionado.data} com fornecedor {pedidoSelecionado.fornecedor}. Status{" "}
+                  <span className="font-medium text-white">{pedidoSelecionado.status}</span>.
+                </p>
+              </header>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-[0.25em] text-gray-500">Fornecedor</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{pedidoSelecionado.fornecedor}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-[0.25em] text-gray-500">Previsao entrega</p>
+                  <p className="mt-2 text-lg font-semibold text-white">
+                    {pedidoSelecionado.previsaoEntrega ?? "Nao informado"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-[0.25em] text-gray-500">Valor total</p>
+                  <p className="mt-2 text-lg font-semibold text-white">
+                    {formatarMoeda(pedidoSelecionado.valorTotal)}
+                  </p>
+                </div>
+              </div>
+
+              <section className="mt-6">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-gray-400">
+                  Itens do pedido
+                </h3>
+                <div className="mt-3 overflow-hidden rounded-2xl border border-white/10">
+                  <table className="min-w-full divide-y divide-white/10 text-sm text-gray-200">
+                    <thead className="bg-white/5 text-xs uppercase tracking-[0.25em] text-gray-400">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-medium">Produto</th>
+                        <th className="px-4 py-3 text-left font-medium">Quantidade</th>
+                        <th className="px-4 py-3 text-left font-medium">Valor unitario</th>
+                        <th className="px-4 py-3 text-left font-medium">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {(pedidoSelecionado.itens ?? []).map((item) => (
+                        <tr key={item.id} className="bg-white/[0.03]">
+                          <td className="px-4 py-3 font-medium text-white">{item.produto}</td>
+                          <td className="px-4 py-3">{item.quantidade}</td>
+                          <td className="px-4 py-3">{formatarMoeda(item.valorUnitario)}</td>
+                          <td className="px-4 py-3 font-medium text-white">
+                            {formatarMoeda(item.quantidade * item.valorUnitario)}
+                          </td>
+                        </tr>
+                      ))}
+                      {(pedidoSelecionado.itens ?? []).length === 0 && (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-6 text-center text-sm text-gray-400">
+                            Nenhum item cadastrado para este pedido.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              <footer className="mt-6 flex justify-end">
+                <button
+                  onClick={fecharModal}
+                  className="rounded-xl border border-white/10 bg-white/5 px-5 py-2 text-sm font-semibold text-gray-300 transition hover:border-white/20 hover:text-white"
+                >
+                  Fechar
+                </button>
+              </footer>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
+
