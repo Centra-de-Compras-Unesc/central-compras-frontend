@@ -59,6 +59,9 @@ export default function PerfilLojista() {
   const [cepMsg, setCepMsg] = useState("");
   const abortRef = useRef(null);
 
+  // ref para limpar o input de arquivo ao remover foto
+  const fileInputRef = useRef(null);
+
   useEffect(() => {
     const savedStr = localStorage.getItem(STORAGE_KEY);
     if (savedStr) {
@@ -117,6 +120,14 @@ export default function PerfilLojista() {
       setProfile((p) => ({ ...p, avatarUrl: dataUrl }));
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleRemoveAvatar = () => {
+    if (!isEditing) return;
+    setProfile((p) => ({ ...p, avatarUrl: "" }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const fetchViaCEP = async (cepDigits) => {
@@ -219,20 +230,33 @@ export default function PerfilLojista() {
         {/* Avatar */}
         <div className="flex items-center gap-4">
           <img
-            src={profile.avatarUrl || "/assets/avatar-placeholder.png"}
+            src={profile.avatarUrl || "/assets/avatar.jpg"}
             alt="avatar"
             className="w-20 h-20 rounded-full object-cover border border-white/20"
           />
-          <label className={`btn-secondary cursor-pointer ${dis(!isEditing)}`}>
-            Trocar foto
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatar}
-              disabled={!isEditing}
-            />
-          </label>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className={`btn-secondary cursor-pointer ${dis(!isEditing)}`}>
+              Trocar foto
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatar}
+                disabled={!isEditing}
+              />
+            </label>
+
+            {isEditing && profile.avatarUrl && (
+              <button
+                type="button"
+                className="btn-secondary bg-red-500/20 hover:bg-red-500/30 text-red-300"
+                onClick={handleRemoveAvatar}
+              >
+                Remover foto
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Identificação */}

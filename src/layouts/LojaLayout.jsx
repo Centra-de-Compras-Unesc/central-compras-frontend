@@ -1,11 +1,30 @@
-﻿import React from "react";
+﻿import React, { useEffect, useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { logout as mockLogout } from "../utils/mockAuth";
 
+const STORAGE_KEY = "userProfile";
+
 export default function LojaLayout() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const [avatarUrl, setAvatarUrl] = useState("");
+
+  // Carrega avatar salvo no perfil
+  useEffect(() => {
+    try {
+      const savedStr = localStorage.getItem(STORAGE_KEY);
+      if (savedStr) {
+        const savedObj = JSON.parse(savedStr);
+        if (savedObj?.avatarUrl) {
+          setAvatarUrl(savedObj.avatarUrl);
+        }
+      }
+    } catch (e) {
+      console.error("Erro ao ler perfil do localStorage", e);
+    }
+  }, []);
 
   const handleLogout = () => {
     try {
@@ -127,8 +146,18 @@ export default function LojaLayout() {
               <h1 className="text-lg font-semibold">Central de Compras</h1>
             </div>
             <div className="flex items-center gap-3">
+              {/* Avatar ao lado do botão sair */}
+              {avatarUrl && (
+                <img
+                  src={avatarUrl}
+                  alt="Avatar do usuário"
+                  className="w-8 h-8 rounded-full object-cover border border-dark-border"
+                />
+              )}
               <span className="text-sm text-dark-text/80">{user?.nome}</span>
-              <button onClick={handleLogout} className="btn-primary bg-primary/90 hover:bg-primary">Sair</button>
+              <button onClick={handleLogout} className="btn-primary bg-primary/90 hover:bg-primary">
+                Sair
+              </button>
             </div>
           </div>
         </header>
@@ -141,19 +170,28 @@ export default function LojaLayout() {
 
       {/* Mobile Drawer */}
       <div id="mobile-drawer" className="hidden fixed inset-0 z-50 sm:hidden">
-        <div className="absolute inset-0 bg-black/50" onClick={() => document.getElementById('mobile-drawer')?.classList.add('hidden')}></div>
+        <div
+          className="absolute inset-0 bg-black/50"
+          onClick={() => document.getElementById("mobile-drawer")?.classList.add("hidden")}
+        ></div>
         <div className="absolute left-0 top-0 h-full w-64 bg-dark-surface border-r border-dark-border p-2">
           <div className="px-4 py-4 border-b border-dark-border flex items-center justify-between">
             <span className="text-primary font-semibold">Menu</span>
-            <button aria-label="Fechar" className="p-2" onClick={() => document.getElementById('mobile-drawer')?.classList.add('hidden')}>✕</button>
+            <button
+              aria-label="Fechar"
+              className="p-2"
+              onClick={() => document.getElementById("mobile-drawer")?.classList.add("hidden")}
+            >
+              ✕
+            </button>
           </div>
           <nav className="mt-2 flex flex-col gap-1 px-2">
             {menuItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
-                onClick={() => document.getElementById('mobile-drawer')?.classList.add('hidden')}
-                className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+                onClick={() => document.getElementById("mobile-drawer")?.classList.add("hidden")}
+                className={({ isActive }) => `sidebar-item ${isActive ? "active" : ""}`}
               >
                 {item.icon}
                 <span className="ml-3">{item.text}</span>
