@@ -1,7 +1,7 @@
-import React from "react";
+﻿import React from "react";
 import PropTypes from "prop-types";
 
-export default function PedidoCard({ pedido }) {
+export default function PedidoCard({ pedido, onVerDetalhes }) {
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
       case "pendente":
@@ -12,6 +12,12 @@ export default function PedidoCard({ pedido }) {
         return "bg-blue-500/20 text-blue-400";
       default:
         return "bg-dark-surface text-dark-text";
+    }
+  };
+
+  const handleVerDetalhes = () => {
+    if (typeof onVerDetalhes === "function") {
+      onVerDetalhes(pedido);
     }
   };
 
@@ -42,14 +48,17 @@ export default function PedidoCard({ pedido }) {
         </div>
         {pedido.previsaoEntrega && (
           <div className="flex justify-between">
-            <span className="text-dark-text/70">Previsão de Entrega:</span>
+            <span className="text-dark-text/70">Previsao de Entrega:</span>
             <span className="font-medium">{pedido.previsaoEntrega}</span>
           </div>
         )}
       </div>
 
       <div className="mt-4 flex justify-end space-x-2">
-        <button className="text-primary hover:text-primary/90 text-sm font-medium">
+        <button
+          onClick={handleVerDetalhes}
+          className="text-primary hover:text-primary/90 text-sm font-medium"
+        >
           Ver Detalhes
         </button>
         {pedido.status === "Pendente" && (
@@ -71,4 +80,9 @@ PedidoCard.propTypes = {
     valorTotal: PropTypes.number.isRequired,
     previsaoEntrega: PropTypes.string,
   }).isRequired,
+  onVerDetalhes: PropTypes.func,
+};
+
+PedidoCard.defaultProps = {
+  onVerDetalhes: undefined,
 };
