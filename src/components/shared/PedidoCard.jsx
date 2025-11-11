@@ -1,88 +1,101 @@
 ﻿import React from "react";
-import PropTypes from "prop-types";
 
-export default function PedidoCard({ pedido, onVerDetalhes }) {
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "pendente":
-        return "bg-yellow-500/20 text-yellow-400";
-      case "aprovado":
-        return "bg-green-500/20 text-green-400";
-      case "enviado":
-        return "bg-blue-500/20 text-blue-400";
-      default:
-        return "bg-dark-surface text-dark-text";
-    }
-  };
+const statusBadgeStyles = {
+  pendente: "border border-amber-500/30 bg-amber-500/10 text-amber-300",
+  aprovado: "border border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+  "em separacao":
+    "border border-sky-500/30 bg-sky-500/10 text-sky-300",
+  enviado: "border border-blue-500/30 bg-blue-500/10 text-blue-300",
+  entregue: "border border-gray-500/30 bg-gray-500/10 text-gray-300",
+  cancelado: "border border-red-500/30 bg-red-500/10 text-red-300",
+};
 
-  const handleVerDetalhes = () => {
-    if (typeof onVerDetalhes === "function") {
-      onVerDetalhes(pedido);
-    }
-  };
+function formatarMoeda(valor) {
+  if (typeof valor !== "number") return valor;
+  return valor.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+export default function PedidoCard({
+  pedido,
+  onVerDetalhes,
+  onCancelar,
+  onOcultar,
+  cancelando,
+}) {
+  const statusKey = String(pedido.status || "").toLowerCase();
+  const badgeClass =
+    statusBadgeStyles[statusKey] ||
+    "border border-white/10 bg-white/5 text-gray-200";
+
+  const ehPendente = statusKey === "pendente";
+  const ehCancelado = statusKey === "cancelado";
 
   return (
-    <div className="card mb-4">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-semibold">Pedido #{pedido.numero}</h3>
-          <p className="text-dark-text/70 text-sm">{pedido.data}</p>
-        </div>
-        <span
-          className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-            pedido.status
-          )}`}
-        >
-          {pedido.status}
-        </span>
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex justify-between">
-          <span className="text-dark-text/70">Fornecedor:</span>
-          <span className="font-medium">{pedido.fornecedor}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-dark-text/70">Valor Total:</span>
-          <span className="font-medium">R$ {pedido.valorTotal.toFixed(2)}</span>
-        </div>
-        {pedido.previsaoEntrega && (
-          <div className="flex justify-between">
-            <span className="text-dark-text/70">Previsao de Entrega:</span>
-            <span className="font-medium">{pedido.previsaoEntrega}</span>
+    <div className="flex flex-col justify-between rounded-3xl border border-white/10 bg-[#111118]/80 p-4">
+      <div className="space-y-2 text-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="font-mono text-[11px] text-gray-500">
+              {pedido.numero}
+            </p>
+            <p className="mt-1 text-sm font-semibold text-white">
+              {pedido.fornecedor}
+            </p>
           </div>
-        )}
+
+          <span
+            className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${badgeClass}`}
+          >
+            {pedido.status}
+          </span>
+        </div>
+
+        <p className="text-xs text-gray-400">
+          Data do pedido:{" "}
+          <span className="font-medium text-gray-200">{pedido.data}</span>
+        </p>
+
+        <p className="text-xs text-gray-400">
+          Valor total:{" "}
+          <span className="font-semibold text-primary">
+            {formatarMoeda(pedido.valorTotal)}
+          </span>
+        </p>
       </div>
 
-      <div className="mt-4 flex justify-end space-x-2">
+      <div className="mt-4 flex items-center justify-between gap-2">
         <button
-          onClick={handleVerDetalhes}
-          className="text-primary hover:text-primary/90 text-sm font-medium"
+          type="button"
+          onClick={onVerDetalhes}
+          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-gray-200 transition hover:border-white/30 hover:text-white"
         >
-          Ver Detalhes
+          Ver detalhes
         </button>
-        {pedido.status === "Pendente" && (
-          <button className="text-red-400 hover:text-red-300 text-sm font-medium">
-            Cancelar
+
+        {ehPendente && !!onCancelar && (
+          <button
+            type="button"
+            onClick={onCancelar}
+            disabled={cancelando}
+            className="rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {cancelando ? "Cancelando..." : "Cancelar"}
+          </button>
+        )}
+
+        {ehCancelado && !!onOcultar && (
+          <button
+            type="button"
+            onClick={onOcultar}
+            className="rounded-xl border border-white/15 bg-transparent px-3 py-2 text-xs font-medium text-gray-300 transition hover:border-red-400/60 hover:text-red-300"
+          >
+            Remover da lista
           </button>
         )}
       </div>
     </div>
   );
 }
-
-PedidoCard.propTypes = {
-  pedido: PropTypes.shape({
-    numero: PropTypes.string.isRequired,
-    data: PropTypes.string.isRequired,
-    status: PropTypes.string.isRequired,
-    fornecedor: PropTypes.string.isRequired,
-    valorTotal: PropTypes.number.isRequired,
-    previsaoEntrega: PropTypes.string,
-  }).isRequired,
-  onVerDetalhes: PropTypes.func,
-};
-
-PedidoCard.defaultProps = {
-  onVerDetalhes: undefined,
-};
