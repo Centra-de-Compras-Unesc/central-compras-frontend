@@ -1,41 +1,67 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+ // backend na porta 3000, sem /api
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_BASE = `${API_URL}/campanhas`;
 
-const INITIAL_CAMPANHAS = [
-  {
-    id: 1,
-    titulo: "Campanha de Verão",
-    subtitulo: "Descontos e cashback",
-    descricao: "Ofertas especiais de verão com descontos progressivos e cashback.",
-    imagem: "/assets/natal.jpg",
-    ativo: true,
-  },
-  {
-    id: 2,
-    titulo: "Liquidação",
-    subtitulo: "Black Friday",
-    descricao:
-      "Liquidação de Black Friday com promoções em toda a loja, incluindo eletrônicos, papelaria e escritório.",
+
+// Helper para fazer fetch + JSON com tratamento de erro
+async function fetchJson(url, options = {}) {
+  const res = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+    ...options,
+  });
+
+  // DELETE normalmente não tem body
+  if (options.method === "DELETE") {
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Erro HTTP ${res.status}: ${text}`);
+    }
+    return;
+  }
+
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`Erro HTTP ${res.status}: ${text}`);
+  }
+
+  // se vier vazio, retorna null
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    console.error("Resposta não é JSON:", text);
+    throw new Error("Resposta do servidor não é JSON válido");
+  }
+}
+
+// Converte o objeto do banco para o formato da tela
+function mapApiToUi(c) {
+  return {
+    id: c.id,
+    titulo: c.descricao_campanha || `Campanha #${c.id}`,
+    subtitulo: c.tipo || "",
+    descricao: c.descricao_campanha || "",
+    // por enquanto uso uma imagem padrão; depois podemos mapear c.foto
     imagem: "/assets/blackfriday.jpg",
-    ativo: true,
-  },
-  {
-    id: 3,
-    titulo: "Promoção Escritório",
-    subtitulo: "Ofertas",
-    descricao:
-      "Campanha focada em produtos de escritório com preços especiais para empresas parceiras.",
-    imagem: "/assets/blackfriday.jpg",
-    ativo: false,
-  },
-];
+    ativo: c.ativa ?? true,
+  };
+}
 
 export default function Campanhas() {
-  const [campanhas, setCampanhas] = useState(INITIAL_CAMPANHAS);
+  const [campanhas, setCampanhas] = useState([]); // vem do backend
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState(null);
+
   const [showModal, setShowModal] = useState(false); // criar/editar
   const [imagePreview, setImagePreview] = useState(null);
   const [isManaging, setIsManaging] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [detailCampanha, setDetailCampanha] = useState(null); // 🔥 detalhe
+  const [detailCampanha, setDetailCampanha] = useState(null); // detalhe
 
   const [formData, setFormData] = useState({
     titulo: "",
@@ -44,6 +70,29 @@ export default function Campanhas() {
     imagem: "",
     ativo: false,
   });
+
+  // ==========================
+  // 1) Carregar campanhas do banco ao abrir a tela
+  // ==========================
+  useEffect(() => {
+    const carregar = async () => {
+      try {
+        const data = await fetchJson(API_BASE);
+        if (Array.isArray(data)) {
+          setCampanhas(data.map(mapApiToUi));
+        } else {
+          setCampanhas([]);
+        }
+      } catch (e) {
+        console.error(e);
+        setErro("Erro ao carregar campanhas");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregar();
+  }, []);
 
   const resetForm = () => {
     setFormData({
@@ -102,13 +151,26 @@ export default function Campanhas() {
     reader.readAsDataURL(file);
   };
 
-  const handleDelete = (id) => {
+  // ==========================
+  // 2) Excluir campanha (DELETE no backend)
+  // ==========================
+  const handleDelete = async (id) => {
     const ok = window.confirm("Tem certeza que deseja excluir esta campanha?");
     if (!ok) return;
-    setCampanhas((prev) => prev.filter((c) => c.id !== id));
+
+    try {
+      await fetchJson(`${API_BASE}/${id}`, { method: "DELETE" });
+      setCampanhas((prev) => prev.filter((c) => c.id !== id));
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao excluir campanha");
+    }
   };
 
-  const handleSubmit = (e) => {
+  // ==========================
+  // 3) Salvar campanha (nova ou edição) no banco
+  // ==========================
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.titulo.trim()) {
@@ -116,7 +178,7 @@ export default function Campanhas() {
       return;
     }
 
-    const dadosCampanha = {
+    const dadosCampanhaTela = {
       titulo: formData.titulo.trim(),
       subtitulo: formData.subtitulo.trim(),
       descricao: formData.descricao.trim(),
@@ -124,23 +186,57 @@ export default function Campanhas() {
       ativo: formData.ativo,
     };
 
-    if (editingId !== null) {
-      // EDITAR
-      setCampanhas((prev) =>
-        prev.map((c) =>
-          c.id === editingId ? { ...c, ...dadosCampanha } : c
-        )
-      );
-    } else {
-      // NOVA
-      const novaCampanha = {
-        id: Date.now(),
-        ...dadosCampanha,
-      };
-      setCampanhas((prev) => [...prev, novaCampanha]);
-    }
+    // payload para o backend (tb_fornecedor_campanha)
+    const payloadApi = {
+      id_fornecedor: 1, // TODO: trocar pelo fornecedor real
+      id_usuario: 1, // TODO: usuário logado
+      id_conta: 1, // TODO: conta correta
+      descricao_campanha:
+        dadosCampanhaTela.descricao || dadosCampanhaTela.titulo,
+      valor_meta: null,
+      tempo_duracao_campanha: null,
+      dt_inicio: null,
+      dt_fim: null,
+      tipo: dadosCampanhaTela.subtitulo || null,
+      pedido_minimo: null,
+      percentual_cashback_campanha: null,
+      bloquear_pedidos_se_nao_atingir: false,
+      tem_meta_global: false,
+      ativa: dadosCampanhaTela.ativo,
+      status: dadosCampanhaTela.ativo ? "ATIVA" : "INATIVA",
+      // foto: aqui poderíamos mandar dadosCampanhaTela.imagem (base64)
+      // mas depende do tipo da coluna no banco; por enquanto deixo null
+      foto: null,
+    };
 
-    handleCloseModal();
+    try {
+      if (editingId !== null) {
+        // EDITAR -> PUT /campanhas/:id
+        const updated = await fetchJson(`${API_BASE}/${editingId}`, {
+          method: "PUT",
+          body: JSON.stringify(payloadApi),
+        });
+
+        const ui = mapApiToUi(updated);
+        setCampanhas((prev) =>
+          prev.map((c) => (c.id === editingId ? ui : c))
+        );
+      } else {
+        // NOVA -> POST /campanhas
+        const created = await fetchJson(API_BASE, {
+          method: "POST",
+          body: JSON.stringify(payloadApi),
+        });
+
+        const ui = mapApiToUi(created);
+        setCampanhas((prev) => [...prev, ui]);
+      }
+
+      handleCloseModal();
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao salvar campanha");
+    }
   };
 
   // campanhas visíveis na grade
@@ -148,7 +244,7 @@ export default function Campanhas() {
     ? campanhas
     : campanhas.filter((c) => c.ativo);
 
-  // 🔍 Detalhes (Saiba mais)
+  // Detalhes (Saiba mais)
   const handleOpenDetails = (campanha) => {
     setDetailCampanha(campanha);
   };
@@ -156,6 +252,19 @@ export default function Campanhas() {
   const handleCloseDetails = () => {
     setDetailCampanha(null);
   };
+
+  // Loading / erro simples
+  if (loading) {
+    return <div className="p-6">Carregando campanhas...</div>;
+  }
+
+  if (erro) {
+    return (
+      <div className="p-6">
+        <p className="text-red-400">{erro}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
