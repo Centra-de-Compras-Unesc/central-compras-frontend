@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { logout as mockLogout } from "../utils/mockAuth";
 
@@ -7,9 +7,13 @@ const STORAGE_KEY = "userProfile";
 
 export default function LojaLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
 
   const [avatarUrl, setAvatarUrl] = useState("");
+
+  // true = menu grande (texto + ícone) | false = só ícones
+  const showFullMenu = location.pathname === "/loja/dashboard";
 
   // Carrega avatar salvo no perfil
   useEffect(() => {
@@ -39,7 +43,12 @@ export default function LojaLayout() {
     {
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+          />
         </svg>
       ),
       text: "Dashboard",
@@ -48,7 +57,12 @@ export default function LojaLayout() {
     {
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+          />
         </svg>
       ),
       text: "Fornecedores",
@@ -57,7 +71,12 @@ export default function LojaLayout() {
     {
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 7h18M3 12h18M3 17h18"
+          />
         </svg>
       ),
       text: "Produtos",
@@ -66,7 +85,12 @@ export default function LojaLayout() {
     {
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-7 4h8M5 8h14" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 12h6m-7 4h8M5 8h14"
+          />
         </svg>
       ),
       text: "Campanhas",
@@ -75,7 +99,12 @@ export default function LojaLayout() {
     {
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+          />
         </svg>
       ),
       text: "Pedidos",
@@ -84,7 +113,12 @@ export default function LojaLayout() {
     {
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
       ),
       text: "Cashback",
@@ -93,7 +127,12 @@ export default function LojaLayout() {
     {
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+          />
         </svg>
       ),
       text: "Perfil",
@@ -104,10 +143,27 @@ export default function LojaLayout() {
   return (
     <div className="flex h-screen bg-dark-bg text-dark-text">
       {/* Sidebar */}
-      <div className="hidden sm:block w-64 bg-dark-surface border-r border-dark-border">
-        {/* Logo */}
-        <div className="px-6 py-5 border-b border-dark-border">
-          <h1 className="text-xl font-bold text-primary">Central de Compras</h1>
+      <div
+        className={`hidden sm:block bg-dark-surface border-r border-dark-border ${
+          showFullMenu ? "w-64" : "w-20"
+        }`}
+      >
+        {/* Logo / Ícone */}
+        <div
+          className={`border-b border-dark-border flex items-center ${
+            showFullMenu ? "px-6 justify-start" : "px-0 justify-center"
+          } py-5`}
+        >
+          {showFullMenu ? (
+            <h1 className="text-xl font-bold text-primary">Central de Compras</h1>
+          ) : (
+            // TROCAR src PELO CAMINHO DO SEU ÍCONE
+            <img
+              src="/assets/icone-central.png"
+              alt="Central de Compras"
+              className="w-10 h-10 object-contain"
+            />
+          )}
         </div>
 
         {/* Menu */}
@@ -119,7 +175,7 @@ export default function LojaLayout() {
               className={({ isActive }) => `sidebar-item ${isActive ? "active" : ""}`}
             >
               {item.icon}
-              <span className="ml-3">{item.text}</span>
+              {showFullMenu && <span className="ml-3">{item.text}</span>}
             </NavLink>
           ))}
         </nav>
@@ -140,7 +196,12 @@ export default function LojaLayout() {
                 }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
               <h1 className="text-lg font-semibold">Central de Compras</h1>
@@ -155,7 +216,10 @@ export default function LojaLayout() {
                 />
               )}
               <span className="text-sm text-dark-text/80">{user?.nome}</span>
-              <button onClick={handleLogout} className="btn-primary bg-primary/90 hover:bg-primary">
+              <button
+                onClick={handleLogout}
+                className="btn-primary bg-primary/90 hover:bg-primary"
+              >
                 Sair
               </button>
             </div>
@@ -194,7 +258,7 @@ export default function LojaLayout() {
                 className={({ isActive }) => `sidebar-item ${isActive ? "active" : ""}`}
               >
                 {item.icon}
-                <span className="ml-3">{item.text}</span>
+                {showFullMenu && <span className="ml-3">{item.text}</span>}
               </NavLink>
             ))}
           </nav>
