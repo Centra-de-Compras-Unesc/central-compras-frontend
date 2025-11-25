@@ -1,12 +1,35 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-
-const STORAGE_KEY = "userProfile";
+import { api } from "../../utils/api";
 
 const UFS = [
-  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA",
-  "MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN",
-  "RS","RO","RR","SC","SP","SE","TO"
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO",
 ];
 
 const onlyDigits = (v = "") => String(v).replace(/\D/g, "");
@@ -17,22 +40,27 @@ const isCepOk = (v = "") => onlyDigits(v).length === 8;
 function formatCEP(digits) {
   const d = clamp(onlyDigits(digits), 8);
   if (d.length <= 5) return d;
-  return `${d.slice(0,5)}-${d.slice(5)}`;
+  return `${d.slice(0, 5)}-${d.slice(5)}`;
 }
 function formatCNPJ(digits) {
   const d = clamp(onlyDigits(digits), 14);
   if (d.length <= 2) return d;
-  if (d.length <= 5) return `${d.slice(0,2)}.${d.slice(2)}`;
-  if (d.length <= 8) return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5)}`;
-  if (d.length <= 12) return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8)}`;
-  return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12)}`;
+  if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
+  if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
+  if (d.length <= 12)
+    return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(
+    8,
+    12
+  )}-${d.slice(12)}`;
 }
 function formatPhoneBR(digits) {
   const d = clamp(onlyDigits(digits), 11);
   if (d.length <= 2) return d;
-  if (d.length <= 6) return `(${d.slice(0,2)}) ${d.slice(2)}`;
-  if (d.length === 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
-  return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length === 10)
+    return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 }
 
 export default function PerfilLojista() {
@@ -50,7 +78,7 @@ export default function PerfilLojista() {
     bairro: "",
     cidade: "",
     estado: "",
-    avatarUrl: ""
+    avatarUrl: "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -63,16 +91,29 @@ export default function PerfilLojista() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const savedStr = localStorage.getItem(STORAGE_KEY);
-    if (savedStr) {
+    const loadProfile = async () => {
       try {
-        const savedObj = JSON.parse(savedStr);
-        setProfile((p) => ({ ...p, ...savedObj }));
-      } catch {}
-    } else if (user?.nome) {
-      setProfile((p) => ({ ...p, nome: user.nome }));
-    }
-  }, [user?.nome]);
+        if (user?.id) {
+          const response = await api(`/usuarios/${user.id}`);
+          if (response && !response.error) {
+            const cleanProfile = { ...response };
+            delete cleanProfile.id;
+            delete cleanProfile.id_conta;
+            delete cleanProfile.ativo;
+            delete cleanProfile.senha;
+            delete cleanProfile.token;
+            delete cleanProfile.tb_sistema_conta;
+
+            setProfile((p) => ({ ...p, ...cleanProfile }));
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao carregar perfil:", error);
+      }
+    };
+
+    loadProfile();
+  }, [user?.id]);
 
   /* ==========
      Handlers
@@ -143,7 +184,7 @@ export default function PerfilLojista() {
       setCepMsg("Buscando endereço...");
 
       const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`, {
-        signal: controller.signal
+        signal: controller.signal,
       });
       if (!res.ok) throw new Error("Falha na consulta do CEP");
       const data = await res.json();
@@ -155,7 +196,7 @@ export default function PerfilLojista() {
         endereco: p.endereco || data.logradouro || "",
         bairro: p.bairro || data.bairro || "",
         cidade: data.localidade || "",
-        estado: data.uf || ""
+        estado: data.uf || "",
       }));
 
       setCepStatus("ok");
@@ -178,38 +219,63 @@ export default function PerfilLojista() {
     else if (profile.cep) {
       setCepStatus("erro");
       setCepMsg("Informe 8 dígitos para o CEP.");
-      setTimeout(() => { setCepStatus("idle"); setCepMsg(""); }, 1500);
+      setTimeout(() => {
+        setCepStatus("idle");
+        setCepMsg("");
+      }, 1500);
     }
   };
 
   useEffect(() => {
     if (!isEditing) return;
     if (isCepOk(profile.cep)) fetchViaCEP(profile.cep);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile.cep, isEditing]);
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (!isEditing) {
       setIsEditing(true);
       return;
     }
+    if (!user?.id) {
+      alert("Erro: usuário não identificado");
+      return;
+    }
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-    } catch {}
-    if (profile.email) login({ nome: profile.email });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 1500);
-    setIsEditing(false);
-  };
+      const profileData = (() => {
+        const { ...data } = profile;
+        delete data.tb_sistema_conta;
+        return data;
+      })();
 
+      await api(`/usuarios/${user.id}`, { method: "PUT", body: profileData });
+
+      if (profileData.email) {
+        login({ token: sessionStorage.getItem("token") });
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 1500);
+    } catch (error) {
+      console.error("Erro ao salvar perfil:", error);
+      alert("Erro ao salvar perfil: " + error.message);
+    } finally {
+      setIsEditing(false);
+    }
+  };
   const handleCancel = () => {
-    const savedStr = localStorage.getItem(STORAGE_KEY);
-    if (savedStr) {
-      try {
-        const savedObj = JSON.parse(savedStr);
-        setProfile((p) => ({ ...p, ...savedObj }));
-      } catch {}
+    if (user?.id) {
+      api(`/usuarios/${user.id}`).then((response) => {
+        if (response && !response.error) {
+          const cleanProfile = { ...response };
+          delete cleanProfile.id;
+          delete cleanProfile.id_conta;
+          delete cleanProfile.ativo;
+          delete cleanProfile.senha;
+          delete cleanProfile.token;
+          delete cleanProfile.tb_sistema_conta;
+          setProfile((p) => ({ ...p, ...cleanProfile }));
+        }
+      });
     }
     setIsEditing(false);
   };
@@ -220,7 +286,7 @@ export default function PerfilLojista() {
   const telefoneMasked = formatPhoneBR(profile.telefone);
   const cnpjMasked = formatCNPJ(profile.cnpj);
   const cepMasked = formatCEP(profile.cep);
-  const dis = (disabled) => disabled ? "opacity-60 cursor-not-allowed" : "";
+  const dis = (disabled) => (disabled ? "opacity-60 cursor-not-allowed" : "");
 
   return (
     <div className="space-y-6">
@@ -235,7 +301,9 @@ export default function PerfilLojista() {
             className="w-20 h-20 rounded-full object-cover border border-white/20"
           />
           <div className="flex flex-wrap items-center gap-2">
-            <label className={`btn-secondary cursor-pointer ${dis(!isEditing)}`}>
+            <label
+              className={`btn-secondary cursor-pointer ${dis(!isEditing)}`}
+            >
               Trocar foto
               <input
                 ref={fileInputRef}
@@ -262,7 +330,9 @@ export default function PerfilLojista() {
         {/* Identificação */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-dark-text/70 mb-1">Nome Usuário</label>
+            <label className="block text-sm text-dark-text/70 mb-1">
+              Nome Usuário
+            </label>
             <input
               name="nome"
               value={profile.nome}
@@ -272,7 +342,9 @@ export default function PerfilLojista() {
             />
           </div>
           <div>
-            <label className="block text-sm text-dark-text/70 mb-1">Email</label>
+            <label className="block text-sm text-dark-text/70 mb-1">
+              Email
+            </label>
             <input
               name="email"
               type="email"
@@ -299,7 +371,9 @@ export default function PerfilLojista() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-dark-text/70 mb-1">Telefone</label>
+              <label className="block text-sm text-dark-text/70 mb-1">
+                Telefone
+              </label>
               <input
                 name="telefone"
                 value={telefoneMasked}
@@ -312,7 +386,9 @@ export default function PerfilLojista() {
               />
             </div>
             <div>
-              <label className="block text-sm text-dark-text/70 mb-1">CNPJ</label>
+              <label className="block text-sm text-dark-text/70 mb-1">
+                CNPJ
+              </label>
               <input
                 name="cnpj"
                 value={cnpjMasked}
@@ -333,7 +409,9 @@ export default function PerfilLojista() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm text-dark-text/70 mb-1">CEP</label>
+              <label className="block text-sm text-dark-text/70 mb-1">
+                CEP
+              </label>
               <input
                 name="cep"
                 value={cepMasked}
@@ -349,9 +427,11 @@ export default function PerfilLojista() {
                 <span
                   className={
                     "text-xs block mt-1 " +
-                    (cepStatus === "loading" ? "text-blue-300" :
-                     cepStatus === "ok" ? "text-green-400" :
-                     "text-red-400")
+                    (cepStatus === "loading"
+                      ? "text-blue-300"
+                      : cepStatus === "ok"
+                      ? "text-green-400"
+                      : "text-red-400")
                   }
                 >
                   {cepMsg}
@@ -359,7 +439,9 @@ export default function PerfilLojista() {
               )}
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-dark-text/70 mb-1">Endereço</label>
+              <label className="block text-sm text-dark-text/70 mb-1">
+                Endereço
+              </label>
               <input
                 name="endereco"
                 value={profile.endereco}
@@ -373,7 +455,9 @@ export default function PerfilLojista() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-1">
-              <label className="block text-sm text-dark-text/70 mb-1">Número</label>
+              <label className="block text-sm text-dark-text/70 mb-1">
+                Número
+              </label>
               <input
                 name="numero"
                 value={profile.numero}
@@ -386,7 +470,9 @@ export default function PerfilLojista() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-dark-text/70 mb-1">Bairro</label>
+              <label className="block text-sm text-dark-text/70 mb-1">
+                Bairro
+              </label>
               <input
                 name="bairro"
                 value={profile.bairro}
@@ -401,7 +487,9 @@ export default function PerfilLojista() {
           {/* CIDADE FIXA */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm text-dark-text/70 mb-1">Cidade</label>
+              <label className="block text-sm text-dark-text/70 mb-1">
+                Cidade
+              </label>
               <input
                 name="cidade"
                 value={profile.cidade}
@@ -412,7 +500,9 @@ export default function PerfilLojista() {
               />
             </div>
             <div>
-              <label className="block text-sm text-dark-text/70 mb-1">Estado (UF)</label>
+              <label className="block text-sm text-dark-text/70 mb-1">
+                Estado (UF)
+              </label>
               <select
                 name="estado"
                 value={profile.estado}
@@ -422,7 +512,9 @@ export default function PerfilLojista() {
               >
                 <option value="">Selecione</option>
                 {UFS.map((uf) => (
-                  <option key={uf} value={uf}>{uf}</option>
+                  <option key={uf} value={uf}>
+                    {uf}
+                  </option>
                 ))}
               </select>
             </div>

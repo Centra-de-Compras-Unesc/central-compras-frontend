@@ -7,22 +7,55 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+package-lock.json
+yarn.lock
+
+# Build outputs
 dist
 dist-ssr
-*.local
+build
+out
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Environment variables
 .env
 .env.local
-package-lock.json
-package.json
+.env.*.local
+
+# IDE / Editor
+.vscode
+.idea
+*.swp
+*.swo
+*.sw?
+*.su
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Runtime
+*.local
+.cache
+
+# Editor backups
+*.bak
+*.orig
+
+# Misc
+*.pem
+.parcel-cache
+.next
+out
+.nuxt
+dist
+.cache/
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port

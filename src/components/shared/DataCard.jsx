@@ -1,4 +1,4 @@
-import React from "react";
+// React DataCard component
 import PropTypes from "prop-types";
 
 export default function DataCard({ title, value, change }) {

@@ -9,6 +9,8 @@ import Campanhas from "../pages/loja/Campanhas";
 import PedidosHistorico from "../pages/loja/PedidosHistorico";
 import Cashback from "../pages/loja/Cashback";
 import Perfil from "../pages/loja/Perfil";
+import Relatorios from "../pages/loja/Relatorios";
+import Configuracoes from "../pages/loja/Configuracoes";
 
 // 🔹 Exporta apenas o conjunto de rotas, sem <Routes> interno
 export const lojaRoutes = (
@@ -21,5 +23,7 @@ export const lojaRoutes = (
     <Route path="pedidos" element={<PedidosHistorico />} />
     <Route path="cashback" element={<Cashback />} />
     <Route path="perfil" element={<Perfil />} />
+    <Route path="relatorios" element={<Relatorios />} />
+    <Route path="configuracoes" element={<Configuracoes />} />
   </Route>
 );

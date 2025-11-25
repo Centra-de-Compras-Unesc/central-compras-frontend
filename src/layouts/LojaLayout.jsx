@@ -2,8 +2,7 @@
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { logout as mockLogout } from "../utils/mockAuth";
-
-const STORAGE_KEY = "userProfile";
+import SystemIcon from "../components/shared/SystemIcon";
 
 export default function LojaLayout() {
   const navigate = useNavigate();
@@ -11,24 +10,15 @@ export default function LojaLayout() {
   const { user, logout } = useAuth();
 
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [menuColapsed, setMenuColapsed] = useState(false);
 
-  // true = menu grande (texto + ícone) | false = só ícones
-  const showFullMenu = location.pathname === "/loja/dashboard";
+  const showFullMenu = !menuColapsed;
 
-  // Carrega avatar salvo no perfil
   useEffect(() => {
-    try {
-      const savedStr = localStorage.getItem(STORAGE_KEY);
-      if (savedStr) {
-        const savedObj = JSON.parse(savedStr);
-        if (savedObj?.avatarUrl) {
-          setAvatarUrl(savedObj.avatarUrl);
-        }
-      }
-    } catch (e) {
-      console.error("Erro ao ler perfil do localStorage", e);
+    if (user?.avatarUrl) {
+      setAvatarUrl(user.avatarUrl);
     }
-  }, []);
+  }, [user?.avatarUrl]);
 
   const handleLogout = () => {
     try {
@@ -42,7 +32,12 @@ export default function LojaLayout() {
   const menuItems = [
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -56,7 +51,31 @@ export default function LojaLayout() {
     },
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
+        </svg>
+      ),
+      text: "Relatórios",
+      path: "/loja/relatorios",
+    },
+    {
+      icon: (
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -70,7 +89,12 @@ export default function LojaLayout() {
     },
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -84,7 +108,12 @@ export default function LojaLayout() {
     },
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -98,7 +127,12 @@ export default function LojaLayout() {
     },
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -112,7 +146,12 @@ export default function LojaLayout() {
     },
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -126,7 +165,12 @@ export default function LojaLayout() {
     },
     {
       icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -138,44 +182,96 @@ export default function LojaLayout() {
       text: "Perfil",
       path: "/loja/perfil",
     },
+    {
+      icon: (
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+      ),
+      text: "Configurações",
+      path: "/loja/configuracoes",
+    },
   ];
 
   return (
     <div className="flex h-screen bg-dark-bg text-dark-text">
       {/* Sidebar */}
       <div
-        className={`hidden sm:block bg-dark-surface border-r border-dark-border ${
+        className={`hidden sm:flex flex-col bg-dark-surface border-r border-dark-border transition-all duration-300 ${
           showFullMenu ? "w-64" : "w-20"
         }`}
       >
         {/* Logo / Ícone */}
         <div
-          className={`border-b border-dark-border flex items-center ${
-            showFullMenu ? "px-6 justify-start" : "px-0 justify-center"
+          className={`border-b border-dark-border flex items-center justify-between ${
+            showFullMenu ? "px-6" : "px-0"
           } py-5`}
         >
           {showFullMenu ? (
-            <h1 className="text-xl font-bold text-primary">Central de Compras</h1>
+            <h1 className="text-lg font-bold text-primary">Central</h1>
           ) : (
-            // TROCAR src PELO CAMINHO DO SEU ÍCONE
-            <img
-              src="/assets/icone-central.png"
-              alt="Central de Compras"
-              className="w-10 h-10 object-contain"
-            />
+            <span className="text-lg font-bold text-primary text-center w-full">
+              C
+            </span>
           )}
+          <button
+            onClick={() => setMenuColapsed(!menuColapsed)}
+            className="p-1 hover:bg-dark-bg rounded transition"
+            title={menuColapsed ? "Expandir" : "Colapsar"}
+          >
+            <svg
+              className={`w-5 h-5 transition-transform ${
+                menuColapsed ? "rotate-0" : "rotate-180"
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
         </div>
 
         {/* Menu */}
-        <nav className="mt-4 flex flex-col gap-1 px-2">
+        <nav className="mt-4 flex flex-col gap-1 px-2 flex-1">
           {menuItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
-              className={({ isActive }) => `sidebar-item ${isActive ? "active" : ""}`}
+              title={menuColapsed ? item.text : ""}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                  isActive
+                    ? "bg-primary text-white"
+                    : "text-gray-400 hover:bg-dark-bg hover:text-white"
+                } ${menuColapsed ? "justify-center" : ""}`
+              }
             >
-              {item.icon}
-              {showFullMenu && <span className="ml-3">{item.text}</span>}
+              <span className="flex-shrink-0">{item.icon}</span>
+              {showFullMenu && (
+                <span className="text-sm font-medium">{item.text}</span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -195,7 +291,12 @@ export default function LojaLayout() {
                   if (el) el.classList.remove("hidden");
                 }}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -204,7 +305,11 @@ export default function LojaLayout() {
                   />
                 </svg>
               </button>
-              <h1 className="text-lg font-semibold">Central de Compras</h1>
+              <img
+                src="/assets/centraldecompras.png"
+                alt="Central de Compras"
+                className="h-14"
+              />
             </div>
             <div className="flex items-center gap-3">
               {/* Avatar ao lado do botão sair */}
@@ -215,7 +320,9 @@ export default function LojaLayout() {
                   className="w-8 h-8 rounded-full object-cover border border-dark-border"
                 />
               )}
-              <span className="text-sm text-dark-text/80">{user?.nome}</span>
+              <span className="text-sm text-dark-text/80">
+                {user?.nome || user?.email}
+              </span>
               <button
                 onClick={handleLogout}
                 className="btn-primary bg-primary/90 hover:bg-primary"
@@ -236,7 +343,9 @@ export default function LojaLayout() {
       <div id="mobile-drawer" className="hidden fixed inset-0 z-50 sm:hidden">
         <div
           className="absolute inset-0 bg-black/50"
-          onClick={() => document.getElementById("mobile-drawer")?.classList.add("hidden")}
+          onClick={() =>
+            document.getElementById("mobile-drawer")?.classList.add("hidden")
+          }
         ></div>
         <div className="absolute left-0 top-0 h-full w-64 bg-dark-surface border-r border-dark-border p-2">
           <div className="px-4 py-4 border-b border-dark-border flex items-center justify-between">
@@ -244,7 +353,11 @@ export default function LojaLayout() {
             <button
               aria-label="Fechar"
               className="p-2"
-              onClick={() => document.getElementById("mobile-drawer")?.classList.add("hidden")}
+              onClick={() =>
+                document
+                  .getElementById("mobile-drawer")
+                  ?.classList.add("hidden")
+              }
             >
               ✕
             </button>
@@ -254,8 +367,14 @@ export default function LojaLayout() {
               <NavLink
                 key={item.path}
                 to={item.path}
-                onClick={() => document.getElementById("mobile-drawer")?.classList.add("hidden")}
-                className={({ isActive }) => `sidebar-item ${isActive ? "active" : ""}`}
+                onClick={() =>
+                  document
+                    .getElementById("mobile-drawer")
+                    ?.classList.add("hidden")
+                }
+                className={({ isActive }) =>
+                  `sidebar-item ${isActive ? "active" : ""}`
+                }
               >
                 {item.icon}
                 {showFullMenu && <span className="ml-3">{item.text}</span>}

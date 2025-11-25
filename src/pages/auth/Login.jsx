@@ -33,13 +33,12 @@ const Login = () => {
         throw new Error(data.message || "Falha ao realizar login");
       }
 
-      // ✅ Atualiza contexto global e salva token/email
-      login({ nome: email, token: data.token });
-      if (remember) localStorage.setItem("userEmail", email);
+      // Atualiza contexto global
+      login({ token: data.token });
 
       console.log("Login bem-sucedido:", data);
 
-      // ✅ Redireciona após login
+      // Redireciona após login
       navigate("/loja/dashboard", { replace: true });
     } catch (err) {
       console.error("Erro no login:", err);
@@ -51,8 +50,12 @@ const Login = () => {
     <div className="min-h-screen bg-dark-bg flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-6 bg-[#1A1A1A] p-8 rounded-xl border border-dark-border shadow-lg">
         <div>
-          <div className="flex justify-center mb-8">
-            <img src="/logo.svg" alt="Central de Compras" className="h-12" />
+          <div className="flex justify-center">
+            <img
+              src="/assets/centraldecompras.png"
+              alt="Central de Compras"
+              className="h-35"
+            />
           </div>
           <h2 className="text-2xl font-semibold text-dark-text text-center mb-2">
             Login
@@ -107,7 +110,11 @@ const Login = () => {
                   onClick={() => setShowPassword((s) => !s)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-dark-text"
                 >
-                  {showPassword ? <IoEyeOffSharp size={20} /> : <IoEye size={20} />}
+                  {showPassword ? (
+                    <IoEyeOffSharp size={20} />
+                  ) : (
+                    <IoEye size={20} />
+                  )}
                 </button>
               </div>
             </div>

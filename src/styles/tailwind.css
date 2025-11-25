@@ -3,8 +3,70 @@
 @tailwind utilities;
 
 @layer base {
+  /* MODO ESCURO - CORES RICAS E PROFUNDAS */
+  html.dark-mode {
+    background-color: #0a0a0f !important;
+    color: #e5e7eb !important;
+  }
+
+  html.dark-mode body {
+    background-color: #0a0a0f !important;
+    color: #e5e7eb !important;
+  }
+
   body {
-    @apply bg-dark-bg text-dark-text;
+    @apply bg-[#0a0a0f] text-gray-100;
+  }
+
+  /* TEMA CLARO - APLICAR GLOBALMENTE */
+  html.light-mode {
+    @apply bg-white text-gray-900;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  html.light-mode body {
+    @apply bg-gray-50 text-gray-900;
+    background-color: #f9fafb !important;
+    color: #111827 !important;
+  }
+
+  /* Aplicar tema claro em todos os elementos */
+  html.light-mode * {
+    color-scheme: light !important;
+  }
+
+  html.light-mode button,
+  html.light-mode a,
+  html.light-mode input,
+  html.light-mode select,
+  html.light-mode textarea {
+    background-color: inherit;
+  }
+
+  /* Cards em tema claro */
+  html.light-mode .dark\:bg-dark-bg,
+  html.light-mode [class*="bg-\["],
+  html.light-mode [class*="bg-dark"] {
+    @apply bg-white text-gray-900;
+  }
+
+  html.light-mode .dark\:text-dark-text {
+    @apply text-gray-900;
+  }
+
+  html.light-mode .dark\:border-dark-border {
+    @apply border-gray-300;
+  }
+
+  /* Backgrounds para tema claro */
+  html.light-mode [class*="bg-\[#"]:not(.bg-orange) {
+    @apply bg-white text-gray-900;
+  }
+
+  /* Borders para tema claro */
+  html.light-mode [class*="border-"] {
+    @apply border-gray-300;
   }
 }
 
@@ -21,6 +83,10 @@
     @apply bg-dark-surface border border-dark-border rounded-lg p-4;
   }
 
+  html.light-mode .card {
+    @apply bg-white border-gray-300 text-gray-900;
+  }
+
   .btn-primary {
     @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors;
   }
@@ -28,4 +94,44 @@
   .input-dark {
     @apply bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-dark-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
   }
+
+  html.light-mode .input-dark {
+    @apply bg-white border-gray-300 text-gray-900;
+  }
+
+  /* MODO COMPACTO */
+  html.compact-mode {
+    --compact-spacing: 0.5rem;
+  }
+
+  /* SEM EFEITOS - Remove sombras e efeitos visuais */
+  html.sem-efeitos * {
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* SEM ANIMAÇÕES */
+  html.sem-animacoes * {
+    @apply !animate-none !transition-none;
+  }
+}
+
+/* Garantir tema claro em cards específicos */
+html.light-mode [class*="bg-\[#111118\]"],
+html.light-mode [class*="bg-\[#15151c\]"],
+html.light-mode [class*="bg-\[#1b1c22\]"] {
+  @apply bg-white !important;
+  border-color: #e5e7eb !important;
+  color: #111827 !important;
+}
+
+/* Texto em tema claro */
+html.light-mode [class*="text-white"],
+html.light-mode [class*="text-gray-400"],
+html.light-mode [class*="text-gray-300"] {
+  @apply text-gray-900;
+}
+
+html.light-mode [class*="text-gray-500"] {
+  @apply text-gray-700;
 }

@@ -1,35 +1,106 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { api } from "../utils/api";
 
 export const AuthContext = createContext({});
 
+function decodeToken(token) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const decoded = JSON.parse(atob(parts[1]));
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // 🔁 Carrega o usuário do localStorage (mantém login ao atualizar a página)
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const email = localStorage.getItem("userEmail");
-    if (token && email) {
-      setUser({ nome: email, token });
-    }
+    const initAuth = async () => {
+      try {
+        const token = sessionStorage.getItem("token");
+
+        if (token) {
+          const decoded = decodeToken(token);
+
+          if (decoded?.id) {
+            try {
+              const response = await api(`/usuarios/${decoded.id}`);
+              if (response && !response.error) {
+                const userData = {
+                  id: decoded.id,
+                  email: response.email || decoded.email,
+                  nome: response.nome,
+                  token,
+                  ...response,
+                };
+                setUser(userData);
+              }
+            } catch (error) {
+              console.error("Erro ao buscar usuário:", error);
+              setUser({
+                id: decoded.id,
+                email: decoded.email,
+                nome: decoded.nome,
+                token,
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao inicializar autenticação:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
-  // ✅ Faz login e atualiza contexto + localStorage
-  const login = (userData) => {
-    if (userData?.token) localStorage.setItem("token", userData.token);
-    if (userData?.nome) localStorage.setItem("userEmail", userData.nome);
-    setUser(userData);
+  const login = async (userData) => {
+    if (userData?.token) {
+      sessionStorage.setItem("token", userData.token);
+      const decoded = decodeToken(userData.token);
+
+      if (decoded?.id) {
+        try {
+          const response = await api(`/usuarios/${decoded.id}`);
+          if (response && !response.error) {
+            const userObj = {
+              id: decoded.id,
+              email: response.email || decoded.email,
+              nome: response.nome,
+              token: userData.token,
+              ...response,
+            };
+            setUser(userObj);
+          }
+        } catch (error) {
+          console.error("Erro ao buscar usuário após login:", error);
+          const userObj = {
+            id: decoded.id,
+            email: decoded.email,
+            nome: userData.nome || decoded.nome,
+            token: userData.token,
+          };
+          setUser(userObj);
+        }
+      }
+    } else {
+      setUser(userData);
+    }
   };
 
-  // ✅ Faz logout e limpa tudo
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userEmail");
+    sessionStorage.removeItem("token");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
