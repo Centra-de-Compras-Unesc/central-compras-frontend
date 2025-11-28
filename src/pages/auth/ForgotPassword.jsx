@@ -37,7 +37,6 @@ const ForgotPassword = () => {
       );
       setTimeout(() => navigate("/", { replace: true }), 3000);
     } catch (err) {
-      console.error("Erro:", err);
       setError(err.message || "Erro ao processar sua solicitação");
     } finally {
       setLoading(false);

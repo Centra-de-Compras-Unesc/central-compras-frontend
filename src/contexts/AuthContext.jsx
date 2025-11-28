@@ -34,24 +34,26 @@ export function AuthProvider({ children }) {
                   id: decoded.id,
                   email: response.email || decoded.email,
                   nome: response.nome,
+                  perfil: decoded.perfil || "loja",
+                  perfis: decoded.perfis || [],
                   token,
                   ...response,
                 };
                 setUser(userData);
               }
             } catch (error) {
-              console.error("Erro ao buscar usuário:", error);
               setUser({
                 id: decoded.id,
                 email: decoded.email,
                 nome: decoded.nome,
+                perfil: decoded.perfil || "loja",
+                perfis: decoded.perfis || [],
                 token,
               });
             }
           }
         }
       } catch (error) {
-        console.error("Erro ao inicializar autenticação:", error);
       } finally {
         setLoading(false);
       }
@@ -73,17 +75,20 @@ export function AuthProvider({ children }) {
               id: decoded.id,
               email: response.email || decoded.email,
               nome: response.nome,
+              perfil: decoded.perfil || userData.perfil || "loja",
+              perfis: decoded.perfis || [],
               token: userData.token,
               ...response,
             };
             setUser(userObj);
           }
         } catch (error) {
-          console.error("Erro ao buscar usuário após login:", error);
           const userObj = {
             id: decoded.id,
             email: decoded.email,
             nome: userData.nome || decoded.nome,
+            perfil: decoded.perfil || userData.perfil || "loja",
+            perfis: decoded.perfis || [],
             token: userData.token,
           };
           setUser(userObj);

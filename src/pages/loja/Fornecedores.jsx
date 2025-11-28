@@ -94,7 +94,6 @@ export default function Fornecedores() {
 
         if (!cancelado) setFornecedores(normalizados);
       } catch (e) {
-        console.error("Erro ao carregar /fornecedores:", e);
         if (!cancelado) {
           setErro("Não foi possível carregar os fornecedores. Exibindo dados de exemplo.");
           // mantém mock como fallback

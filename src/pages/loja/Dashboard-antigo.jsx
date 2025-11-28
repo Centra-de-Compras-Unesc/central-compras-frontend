@@ -15,15 +15,15 @@ import {
 } from "recharts";
 
 const dadosGerais = [
-  { id: 1, titulo: "TOTAL DE PEDIDOS", valor: "0", variacao: "+0%" },
+  { id: 1, titulo: "TOTAL DE PEDIDOS", valor: "532", variacao: "+8%" },
   {
     id: 2,
     titulo: "CASHBACK DISPONÍVEL",
-    valor: "R$ 0,00",
-    variacao: "+0%",
+    valor: "R$ 2.580,30",
+    variacao: "+15%",
   },
-  { id: 3, titulo: "PEDIDOS EM ANDAMENTO", valor: "0", variacao: "+0%" },
-  { id: 4, titulo: "FORNECEDORES ATIVOS", valor: "0", variacao: "+0%" },
+  { id: 3, titulo: "PEDIDOS EM ANDAMENTO", valor: "16", variacao: "+3%" },
+  { id: 4, titulo: "FORNECEDORES ATIVOS", valor: "24", variacao: "+2%" },
 ];
 
 const formatCurrency = (value) =>
@@ -40,15 +40,12 @@ const statusStyles = {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [loja, setLoja] = useState(null);
   const [profileName, setProfileName] = useState("");
   const [showNovoPedidoModal, setShowNovoPedidoModal] = useState(false);
   const [fornecedores, setFornecedores] = useState([]);
   const [produtos, setProdutos] = useState([]);
   const [campanhas, setCampanhas] = useState([]);
   const [fornecedoresDestaque, setFornecedoresDestaque] = useState([]);
-  const [dadosGeraisCalculados, setDadosGeraisCalculados] =
-    useState(dadosGerais);
   const [pedidoForm, setPedidoForm] = useState({
     id_fornecedor: "",
     id_produto: "",
@@ -60,7 +57,6 @@ export default function Dashboard() {
   const [salvandoPedido, setSalvandoPedido] = useState(false);
   const [periodoHistorico, setPeriodoHistorico] = useState("12m");
   const [dadosGrafico, setDadosGrafico] = useState([]);
-  const [pedidosFiltradosState, setPedidosFiltradosState] = useState([]);
   const [ultimosPedidos, setUltimosPedidos] = useState([]);
   const [showDetalhePedido, setShowDetalhePedido] = useState(null);
   const [showCondicoesModal, setShowCondicoesModal] = useState(false);
@@ -76,26 +72,8 @@ export default function Dashboard() {
   const [salvandoCondicoes, setSalvandoCondicoes] = useState(false);
 
   useEffect(() => {
-    const carregarLoja = async () => {
-      try {
-        if (!user?.id) return;
-        const lojas = await api("/lojas");
-        const minhaLoja = Array.isArray(lojas)
-          ? lojas.find((l) => l.id_usuario?.toString() === user.id?.toString())
-          : null;
-        if (minhaLoja) {
-          setLoja(minhaLoja);
-        }
-      } catch (error) {
-        // Erro ao carregar loja
-      }
-    };
-    carregarLoja();
-  }, [user?.id]);
-
-  useEffect(() => {
     carregarDados();
-  }, [loja?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     setProfileName(user?.nome || "");
@@ -109,62 +87,10 @@ export default function Dashboard() {
         api("/campanhas").catch(() => []),
       ]);
       setFornecedores(Array.isArray(fornData) ? fornData : []);
-
       if (Array.isArray(pedidosData)) {
-        const pedidosFiltrados = loja?.id
-          ? pedidosData.filter(
-              (p) => p.id_loja?.toString() === loja.id?.toString()
-            )
-          : pedidosData;
-
-        processarPedidosParaGrafico(pedidosFiltrados, periodoHistorico);
-        setPedidosFiltradosState(pedidosFiltrados);
-
-        // Calcular dados gerais reais
-        const totalPedidos = pedidosFiltrados.length;
-        const pedidosEmAndamento = pedidosFiltrados.filter(
-          (p) =>
-            p.status === "Pendente" ||
-            p.status === "Em análise" ||
-            p.status === "Separado"
-        ).length;
-        const totalValor = pedidosFiltrados.reduce(
-          (sum, p) => sum + (parseFloat(p.vl_total_pedido) || 0),
-          0
-        );
-
-        setDadosGeraisCalculados([
-          {
-            id: 1,
-            titulo: "TOTAL DE PEDIDOS",
-            valor: totalPedidos.toString(),
-            variacao: "+0%",
-          },
-          {
-            id: 2,
-            titulo: "CASHBACK DISPONÍVEL",
-            valor: new Intl.NumberFormat("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            }).format(totalValor * 0.05),
-            variacao: "+0%",
-          },
-          {
-            id: 3,
-            titulo: "PEDIDOS EM ANDAMENTO",
-            valor: pedidosEmAndamento.toString(),
-            variacao: "+0%",
-          },
-          {
-            id: 4,
-            titulo: "FORNECEDORES ATIVOS",
-            valor: Array.isArray(fornData) ? fornData.length.toString() : "0",
-            variacao: "+0%",
-          },
-        ]);
-
+        processarPedidosParaGrafico(pedidosData);
         setUltimosPedidos(
-          pedidosFiltrados.slice(0, 3).map((p) => ({
+          pedidosData.slice(0, 3).map((p) => ({
             id: p.id,
             numero: `PED${String(p.id).padStart(4, "0")}`,
             data: p.dt_inc ? String(p.dt_inc).slice(0, 10) : "",
@@ -177,7 +103,7 @@ export default function Dashboard() {
         );
 
         const fornecedoresMap = {};
-        pedidosFiltrados.forEach((p) => {
+        pedidosData.forEach((p) => {
           const f = p.tb_fornecedor;
           if (f) {
             if (!fornecedoresMap[f.id]) {
@@ -196,10 +122,7 @@ export default function Dashboard() {
         const destaque = Object.values(fornecedoresMap)
           .map((f) => ({
             ...f,
-            // Crescimento calculado como percentual de pedidos vs total
-            crescimento: `+${Math.round(
-              (f.count / pedidosFiltrados.length) * 100
-            )}%`,
+            crescimento: `+${Math.floor(Math.random() * 20) + 5}%`,
           }))
           .sort((a, b) => b.total - a.total)
           .slice(0, 5);
@@ -234,113 +157,58 @@ export default function Dashboard() {
           },
         ]);
       }
-      if (Array.isArray(pedidosData)) {
-        const pedidosFiltrados = loja?.id
-          ? pedidosData.filter(
-              (p) => p.id_loja?.toString() === loja.id?.toString()
-            )
-          : pedidosData;
-        // store filtered in state so period change can re-run processing
-        setPedidosFiltradosState(pedidosFiltrados);
-        processarPedidosParaGrafico(pedidosFiltrados, periodoHistorico);
-      }
     } catch (error) {
       // Erro ao carregar dados
     }
   }
 
-  // Recompute chart data when period changes
-  useEffect(() => {
-    if (
-      Array.isArray(pedidosFiltradosState) &&
-      pedidosFiltradosState.length > 0
-    ) {
-      processarPedidosParaGrafico(pedidosFiltradosState, periodoHistorico);
-    }
-  }, [periodoHistorico, pedidosFiltradosState]);
+  function processarPedidosParaGrafico(pedidos) {
+    const dataAtual = new Date();
+    const meses = {};
 
-  function processarPedidosParaGrafico(pedidos, periodo = "12m") {
-    // Build chart data according to selected period.
-    const now = new Date();
-    const buckets = {};
+    for (let i = 11; i >= 0; i--) {
+      const data = new Date(
+        dataAtual.getFullYear(),
+        dataAtual.getMonth() - i,
+        1
+      );
+      const chave = `${String(data.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}/${data.getFullYear()}`;
 
-    if (periodo === "12m") {
-      // last 12 months (month/year keys)
-      for (let i = 11; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const key = `${String(d.getMonth() + 1).padStart(
-          2,
-          "0"
-        )}/${d.getFullYear()}`;
-        buckets[key] = {
-          mes: key,
-          valor: 0,
-          quantidade: 0,
-          _date: new Date(d.getFullYear(), d.getMonth(), 1),
-        };
-      }
-
-      if (Array.isArray(pedidos) && pedidos.length > 0) {
-        pedidos.forEach((p) => {
-          const d = p.dt_inc ? new Date(p.dt_inc) : null;
-          if (!d) return;
-          const key = `${String(d.getMonth() + 1).padStart(
-            2,
-            "0"
-          )}/${d.getFullYear()}`;
-          if (buckets[key]) {
-            buckets[key].valor += Number(p.vl_total_pedido || 0);
-            buckets[key].quantidade += 1;
-          }
-        });
-      }
-
-      const out = Object.values(buckets)
-        .sort((a, b) => a._date - b._date)
-        .map(({ mes, valor, quantidade }) => ({ mes, valor, quantidade }));
-      setDadosGrafico(out);
-      return;
-    }
-
-    // For day-based ranges (7d,30d,90d)
-    let days = 7;
-    if (periodo === "30d") days = 30;
-    else if (periodo === "90d") days = 90;
-
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(now.getDate() - i);
-      const key = d.toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-      });
-      buckets[key] = {
-        mes: key,
-        valor: 0,
-        quantidade: 0,
-        _date: new Date(d.getFullYear(), d.getMonth(), d.getDate()),
+      // Dados fictícios com variação realista
+      const baseValor = 3500 + Math.random() * 4500;
+      const variacao = 0.8 + Math.random() * 0.4;
+      meses[chave] = {
+        mes: chave,
+        valor: Math.round(baseValor * variacao),
+        quantidade: Math.floor(3 + Math.random() * 8),
       };
     }
 
     if (Array.isArray(pedidos) && pedidos.length > 0) {
       pedidos.forEach((p) => {
-        const d = p.dt_inc ? new Date(p.dt_inc) : null;
-        if (!d) return;
-        const key = d.toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "2-digit",
-        });
-        if (buckets[key]) {
-          buckets[key].valor += Number(p.vl_total_pedido || 0);
-          buckets[key].quantidade += 1;
+        const data = p.dt_inc ? new Date(p.dt_inc) : new Date();
+        const chave = `${String(data.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}/${data.getFullYear()}`;
+
+        if (meses[chave]) {
+          meses[chave].valor += Number(p.vl_total_pedido || 0);
+          meses[chave].quantidade += 1;
         }
       });
     }
 
-    const outDays = Object.values(buckets)
-      .sort((a, b) => a._date - b._date)
-      .map(({ mes, valor, quantidade }) => ({ mes, valor, quantidade }));
-    setDadosGrafico(outDays);
+    const dadosOrdenados = Object.values(meses).sort((a, b) => {
+      const [mesA, anoA] = a.mes.split("/").map(Number);
+      const [mesB, anoB] = b.mes.split("/").map(Number);
+      return anoA !== anoB ? anoA - anoB : mesA - mesB;
+    });
+
+    setDadosGrafico(dadosOrdenados);
   }
 
   async function handleAbrirNovoPedido() {
@@ -535,7 +403,7 @@ export default function Dashboard() {
       </section>
 
       <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-        {dadosGeraisCalculados.map((dado) => (
+        {dadosGerais.map((dado) => (
           <DataCard
             key={dado.id}
             title={dado.titulo}
@@ -573,7 +441,7 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-            <div style={{ width: "100%", height: "256px" }}>
+            <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={dadosGrafico}>
                   <CartesianGrid

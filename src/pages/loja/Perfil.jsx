@@ -108,7 +108,6 @@ export default function PerfilLojista() {
           }
         }
       } catch (error) {
-        console.error("Erro ao carregar perfil:", error);
       }
     };
 
@@ -256,7 +255,6 @@ export default function PerfilLojista() {
       setSaved(true);
       setTimeout(() => setSaved(false), 1500);
     } catch (error) {
-      console.error("Erro ao salvar perfil:", error);
       alert("Erro ao salvar perfil: " + error.message);
     } finally {
       setIsEditing(false);

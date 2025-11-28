@@ -69,7 +69,6 @@ export default function Cashback() {
       setCashbackData(mockCashback);
       setTransacoes(mockTransacoes);
     } catch (error) {
-      console.error("Erro ao carregar cashback:", error);
     } finally {
       setCarregando(false);
     }
@@ -130,7 +129,6 @@ export default function Cashback() {
         ).toFixed(2)}`
       );
     } catch (error) {
-      console.error("Erro ao resgate:", error);
       alert("Erro ao processar resgate. Tente novamente.");
     } finally {
       setResgatando(false);

@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix Recharts warnings */
+.recharts-wrapper {
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
 @layer base {
   /* MODO ESCURO - CORES RICAS E PROFUNDAS */
   html.dark-mode {

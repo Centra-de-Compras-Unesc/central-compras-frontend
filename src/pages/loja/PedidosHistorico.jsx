@@ -114,7 +114,6 @@ export default function PedidosHistorico() {
           setPedidos(mapeados);
         }
       } catch (e) {
-        console.error("Erro ao carregar /pedidos:", e);
         // em caso de erro, mantemos o mock mesmo
       }
     }
@@ -166,7 +165,6 @@ export default function PedidosHistorico() {
 
       alert("Pedido cancelado com sucesso.");
     } catch (e) {
-      console.error("Erro ao cancelar pedido:", e);
       alert("Erro ao cancelar pedido. Verifique com o suporte.");
     } finally {
       setCancelandoId(null);
@@ -195,7 +193,6 @@ export default function PedidosHistorico() {
         atual && atual.id === pedido.id ? null : atual
       );
     } catch (e) {
-      console.error("Erro ao remover pedido:", e);
       alert("Erro ao remover pedido. Verifique com o suporte.");
     }
   }

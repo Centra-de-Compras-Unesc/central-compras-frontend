@@ -19,7 +19,6 @@ export default function Configuracoes() {
   };
 
   const handleSave = () => {
-    // Aqui você salvaria as configurações no backend
     addToast("✅ Configurações salvas com sucesso!", "success");
   };
 

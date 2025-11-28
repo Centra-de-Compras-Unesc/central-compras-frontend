@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
-export default function Configuracoes() {
+export default function AdminConfiguracoes() {
   const { addToast } = useOutletContext() || { addToast: () => {} };
   const [settings, setSettings] = useState({
     notificacoes: true,

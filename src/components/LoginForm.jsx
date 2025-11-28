@@ -6,7 +6,6 @@ const LoginForm = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log("Login submetido", { email, password });
   };
 
   return (

@@ -34,7 +34,6 @@ async function fetchJson(url, options = {}) {
   try {
     return JSON.parse(text);
   } catch (err) {
-    console.error("Resposta não é JSON:", text);
     throw new Error("Resposta do servidor não é JSON válido");
   }
 }
@@ -84,7 +83,6 @@ export default function Campanhas() {
           setCampanhas([]);
         }
       } catch (e) {
-        console.error(e);
         setErro("Erro ao carregar campanhas");
       } finally {
         setLoading(false);
@@ -162,7 +160,6 @@ export default function Campanhas() {
       await fetchJson(`${API_BASE}/${id}`, { method: "DELETE" });
       setCampanhas((prev) => prev.filter((c) => c.id !== id));
     } catch (e) {
-      console.error(e);
       alert("Erro ao excluir campanha");
     }
   };
@@ -234,7 +231,6 @@ export default function Campanhas() {
 
       handleCloseModal();
     } catch (e) {
-      console.error(e);
       alert("Erro ao salvar campanha");
     }
   };

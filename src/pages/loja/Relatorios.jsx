@@ -22,6 +22,7 @@ const CORES = ["#ff7324", "#10b981", "#3b82f6", "#f59e0b", "#ef4444"];
 export default function Relatorios() {
   const { user } = useAuth();
   const [pedidos, setPedidos] = useState([]);
+  const [loja, setLoja] = useState(null);
   const [periodo, setPeriodo] = useState("12m");
   const [graficoVendas, setGraficoVendas] = useState([]);
   const [graficoFornecedores, setGraficoFornecedores] = useState([]);
@@ -29,27 +30,47 @@ export default function Relatorios() {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState(null);
 
+  // Primeiro: carregar loja do usuário
+  useEffect(() => {
+    const carregarLoja = async () => {
+      try {
+        if (!user?.id) return;
+        const lojas = await api("/lojas");
+        const minhaLoja = Array.isArray(lojas)
+          ? lojas.find((l) => l.id_usuario?.toString() === user.id?.toString())
+          : null;
+        if (minhaLoja) {
+          setLoja(minhaLoja);
+        }
+      } catch (error) {
+        // Erro ao carregar loja
+      }
+    };
+    carregarLoja();
+  }, [user?.id]);
+
+  // Segundo: carregar dados quando loja estiver pronta ou período mudar
   useEffect(() => {
     carregarDados();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [periodo]);
+  }, [loja?.id, periodo]);
 
   async function carregarDados() {
     setCarregando(true);
     setErro(null);
     try {
-      console.log("Tentando buscar pedidos de /pedidos com user:", user);
       const data = await api("/pedidos");
-      console.log("Dados retornados do /pedidos:", data);
       if (Array.isArray(data)) {
-        setPedidos(data);
-        processarGraficos(data);
+        // Filtrar apenas os pedidos da loja atual
+        const pedidosDaLoja = loja?.id
+          ? data.filter((p) => p.id_loja?.toString() === loja.id?.toString())
+          : [];
+        setPedidos(pedidosDaLoja);
+        processarGraficos(pedidosDaLoja);
       } else {
-        console.warn("Resposta não é um array:", data);
         setPedidos([]);
       }
     } catch (error) {
-      console.error("Erro ao carregar pedidos:", error);
       setErro(error.message);
       setPedidos([]);
     } finally {
@@ -59,51 +80,116 @@ export default function Relatorios() {
 
   function processarGraficos(data) {
     const hoje = new Date();
-    const mesesHistorico = {};
+    let dataInicio;
+    let formato = "MM/YYYY"; // Para 12m
+    let diasRetrocesso = 365;
 
-    for (let i = 11; i >= 0; i--) {
-      const data_mes = new Date(hoje);
-      data_mes.setMonth(data_mes.getMonth() - i);
-      const chave = `${String(data_mes.getMonth() + 1).padStart(
-        2,
-        "0"
-      )}/${data_mes.getFullYear()}`;
-
-      const base = 3500 + Math.random() * 4500;
-      const variacao = base * (0.8 + Math.random() * 0.4);
-      const qtd = Math.floor(3 + Math.random() * 8);
-
-      mesesHistorico[chave] = {
-        mes: chave,
-        total: Math.round(variacao),
-        quantidade: qtd,
-      };
+    // Determinar período e formato
+    if (periodo === "7d") {
+      dataInicio = new Date(hoje);
+      dataInicio.setDate(hoje.getDate() - 7);
+      formato = "DD/MM";
+      diasRetrocesso = 7;
+    } else if (periodo === "30d") {
+      dataInicio = new Date(hoje);
+      dataInicio.setDate(hoje.getDate() - 30);
+      formato = "DD/MM";
+      diasRetrocesso = 30;
+    } else if (periodo === "90d") {
+      dataInicio = new Date(hoje);
+      dataInicio.setDate(hoje.getDate() - 90);
+      formato = "DD/MM";
+      diasRetrocesso = 90;
+    } else {
+      dataInicio = new Date(hoje);
+      dataInicio.setMonth(dataInicio.getMonth() - 12);
     }
 
-    data.forEach((p) => {
-      const d = p.dt_inc ? new Date(p.dt_inc) : new Date();
-      const chave = `${String(d.getMonth() + 1).padStart(
-        2,
-        "0"
-      )}/${d.getFullYear()}`;
-      if (mesesHistorico[chave]) {
-        mesesHistorico[chave].total += Number(p.vl_total_pedido || 0);
-        mesesHistorico[chave].quantidade += 1;
+    const pedidosFiltrados = Array.isArray(data)
+      ? data.filter((p) => {
+          const dataPedido = p.dt_inc ? new Date(p.dt_inc) : new Date();
+          return dataPedido >= dataInicio;
+        })
+      : [];
+
+    const mesesHistorico = {};
+
+    if (periodo === "12m") {
+      for (let i = 12; i >= 0; i--) {
+        const data_mes = new Date(hoje);
+        data_mes.setMonth(data_mes.getMonth() - i);
+        const chave = `${String(data_mes.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}/${data_mes.getFullYear()}`;
+
+        mesesHistorico[chave] = {
+          mes: chave,
+          total: 0,
+          quantidade: 0,
+        };
       }
-    });
+
+      pedidosFiltrados.forEach((p) => {
+        const d = p.dt_inc ? new Date(p.dt_inc) : new Date();
+        const chave = `${String(d.getMonth() + 1).padStart(
+          2,
+          "0"
+        )}/${d.getFullYear()}`;
+        if (mesesHistorico[chave]) {
+          mesesHistorico[chave].total += Number(p.vl_total_pedido || 0);
+          mesesHistorico[chave].quantidade += 1;
+        }
+      });
+    } else {
+      for (let i = diasRetrocesso - 1; i >= 0; i--) {
+        const data_dia = new Date(hoje);
+        data_dia.setDate(hoje.getDate() - i);
+        const chave = data_dia.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+        });
+
+        mesesHistorico[chave] = {
+          mes: chave,
+          total: 0,
+          quantidade: 0,
+        };
+      }
+
+      pedidosFiltrados.forEach((p) => {
+        const d = p.dt_inc ? new Date(p.dt_inc) : new Date();
+        const chave = d.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+        });
+        if (mesesHistorico[chave]) {
+          mesesHistorico[chave].total += Number(p.vl_total_pedido || 0);
+          mesesHistorico[chave].quantidade += 1;
+        }
+      });
+    }
 
     const vendas = Object.values(mesesHistorico).sort((a, b) => {
-      const [mesA, anoA] = a.mes.split("/");
-      const [mesB, anoB] = b.mes.split("/");
-      const dataA = new Date(anoA, mesA - 1);
-      const dataB = new Date(anoB, mesB - 1);
-      return dataA - dataB;
+      if (periodo === "12m") {
+        const [mesA, anoA] = a.mes.split("/");
+        const [mesB, anoB] = b.mes.split("/");
+        const dataA = new Date(anoA, mesA - 1);
+        const dataB = new Date(anoB, mesB - 1);
+        return dataA - dataB;
+      } else {
+        const [diaA, mesA] = a.mes.split("/");
+        const [diaB, mesB] = b.mes.split("/");
+        const dataA = new Date(hoje.getFullYear(), mesA - 1, diaA);
+        const dataB = new Date(hoje.getFullYear(), mesB - 1, diaB);
+        return dataA - dataB;
+      }
     });
 
     setGraficoVendas(vendas);
 
     const fornecedores = {};
-    data.forEach((p) => {
+    pedidosFiltrados.forEach((p) => {
       const nome =
         p.tb_fornecedor?.nome_fantasia || `Fornecedor #${p.id_fornecedor}`;
       if (!fornecedores[nome]) {
@@ -119,7 +205,7 @@ export default function Relatorios() {
     );
 
     const status = {};
-    data.forEach((p) => {
+    pedidosFiltrados.forEach((p) => {
       const s = p.status || "Pendente";
       if (!status[s]) {
         status[s] = 0;
@@ -181,7 +267,7 @@ export default function Relatorios() {
             <h2 className="text-lg font-semibold text-white mb-4">
               Vendas por Período
             </h2>
-            <div className="h-80">
+            <div style={{ width: "100%", height: "320px" }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={graficoVendas}>
                   <CartesianGrid
@@ -189,7 +275,8 @@ export default function Relatorios() {
                     stroke="rgba(255,255,255,0.1)"
                   />
                   <XAxis dataKey="mes" stroke="#999" />
-                  <YAxis stroke="#999" />
+                  <YAxis yAxisId="left" stroke="#ff7324" />
+                  <YAxis yAxisId="right" orientation="right" stroke="#10b981" />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1a1a1a",
@@ -203,6 +290,7 @@ export default function Relatorios() {
                     stroke="#ff7324"
                     strokeWidth={2}
                     name="Valor Total (R$)"
+                    yAxisId="left"
                   />
                   <Line
                     type="monotone"
@@ -210,6 +298,7 @@ export default function Relatorios() {
                     stroke="#10b981"
                     strokeWidth={2}
                     name="Quantidade de Pedidos"
+                    yAxisId="right"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -222,7 +311,7 @@ export default function Relatorios() {
               <h2 className="text-lg font-semibold text-white mb-4">
                 Top 5 Fornecedores
               </h2>
-              <div className="h-64">
+              <div style={{ width: "100%", height: "256px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={graficoFornecedores}>
                     <CartesianGrid
@@ -248,7 +337,7 @@ export default function Relatorios() {
               <h2 className="text-lg font-semibold text-white mb-4">
                 Distribuição por Status
               </h2>
-              <div className="h-64">
+              <div style={{ width: "100%", height: "256px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie

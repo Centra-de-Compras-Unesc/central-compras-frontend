@@ -5,14 +5,14 @@ import ToastContainer from "../components/shared/ToastContainer";
 import { useNotification } from "../hooks/useNotification";
 
 const getInitial = (nome, email) =>
-  (nome?.[0] || email?.[0] || "A").toUpperCase();
+  (nome?.[0] || email?.[0] || "F").toUpperCase();
 
 const MENU_ITEMS = [
-  { path: "/admin", text: "Dashboard", end: true },
-  { path: "/admin/lojas", text: "Lojas" },
-  { path: "/admin/fornecedores", text: "Fornecedores" },
-  { path: "/admin/produtos", text: "Produtos" },
-  { path: "/admin/usuarios", text: "Usuários" },
+  { to: "/fornecedor", label: "Dashboard", end: true },
+  { to: "/fornecedor/pedidos", label: "Pedidos" },
+  { to: "/fornecedor/produtos", label: "Produtos" },
+  { to: "/fornecedor/campanhas", label: "Campanhas" },
+  { to: "/fornecedor/condicoes", label: "Condições Comerciais" },
 ];
 
 const DashboardIcon = () => (
@@ -26,12 +26,12 @@ const DashboardIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
     />
   </svg>
 );
 
-const StoreIcon = () => (
+const OrdersIcon = () => (
   <svg
     className="w-5 h-5"
     fill="none"
@@ -42,23 +42,7 @@ const StoreIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-    />
-  </svg>
-);
-
-const SupplierIcon = () => (
-  <svg
-    className="w-5 h-5"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
     />
   </svg>
 );
@@ -79,7 +63,7 @@ const ProductIcon = () => (
   </svg>
 );
 
-const UsersIcon = () => (
+const CampaignIcon = () => (
   <svg
     className="w-5 h-5"
     fill="none"
@@ -90,7 +74,29 @@ const UsersIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+      d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"
+    />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"
+    />
+  </svg>
+);
+
+const ConditionsIcon = () => (
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
     />
   </svg>
 );
@@ -113,10 +119,10 @@ const ChevronDownIcon = ({ isOpen }) => (
   </svg>
 );
 
-const ChevronLeftIcon = ({ isCollapsed }) => (
+const ChevronLeftIcon = ({ isMinimized }) => (
   <svg
-    className={`w-5 h-5 transition-transform duration-300 ${
-      isCollapsed ? "rotate-0" : "rotate-180"
+    className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${
+      isMinimized ? "rotate-180" : ""
     }`}
     fill="none"
     stroke="currentColor"
@@ -171,18 +177,18 @@ const LogoutIcon = () => (
 
 const menuIcons = {
   0: DashboardIcon,
-  1: StoreIcon,
-  2: SupplierIcon,
-  3: ProductIcon,
-  4: UsersIcon,
+  1: OrdersIcon,
+  2: ProductIcon,
+  3: CampaignIcon,
+  4: ConditionsIcon,
 };
 
-export default function AdminLayout() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const { toasts, addToast, removeToast } = useNotification();
-  const [menuCollapsed, setMenuCollapsed] = useState(false);
+export default function FornecedorLayout() {
+  const [isMinimized, setIsMinimized] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { toasts, addToast, removeToast } = useNotification();
 
   const handleLogout = () => {
     logout();
@@ -190,20 +196,18 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-dark-bg text-dark-text">
+    <div className="flex h-screen bg-dark-bg">
       {/* Sidebar */}
       <aside
-        className={`hidden sm:flex flex-col bg-dark-surface border-r border-dark-border transition-all duration-300 ${
-          menuCollapsed ? "w-20" : "w-64"
-        }`}
+        className={`${
+          isMinimized ? "w-20" : "w-64"
+        } bg-dark-surface border-r border-dark-border flex flex-col transition-all duration-300`}
       >
         {/* Logo Section */}
-        <div className="border-b border-dark-border flex flex-col items-center justify-center py-4 px-3 relative">
+        <div className="p-4 border-b border-dark-border flex flex-col items-center gap-2">
           <div
             className={`flex items-center justify-center transition-all duration-300 ${
-              menuCollapsed
-                ? "opacity-0 scale-75 absolute"
-                : "opacity-100 scale-100"
+              isMinimized ? "hidden" : "block"
             }`}
           >
             <img
@@ -214,9 +218,7 @@ export default function AdminLayout() {
           </div>
           <div
             className={`flex items-center justify-center transition-all duration-300 ${
-              menuCollapsed
-                ? "opacity-100 scale-100"
-                : "opacity-0 scale-75 absolute"
+              isMinimized ? "block" : "hidden"
             }`}
           >
             <img
@@ -226,34 +228,34 @@ export default function AdminLayout() {
             />
           </div>
           <button
-            onClick={() => setMenuCollapsed(!menuCollapsed)}
-            className="mt-2 p-1.5 hover:bg-dark-bg rounded-lg transition-all"
-            title={menuCollapsed ? "Expandir" : "Colapsar"}
+            onClick={() => setIsMinimized(!isMinimized)}
+            className="p-1.5 rounded-lg bg-dark-bg hover:bg-dark-border transition-colors"
+            title={isMinimized ? "Expandir" : "Colapsar"}
           >
-            <ChevronLeftIcon isCollapsed={menuCollapsed} />
+            <ChevronLeftIcon isMinimized={isMinimized} />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="mt-4 flex flex-col gap-1 px-2 flex-1">
+        <nav className="flex-1 p-4 space-y-2">
           {MENU_ITEMS.map((item, idx) => {
             const Icon = menuIcons[idx];
             return (
               <NavLink
-                key={item.path}
-                to={item.path}
+                key={item.to}
+                to={item.to}
                 end={item.end}
-                title={menuCollapsed ? item.text : ""}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                  `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                     isActive
                       ? "bg-primary text-white"
-                      : "text-gray-400 hover:bg-dark-bg hover:text-white"
-                  }`
+                      : "text-gray-400 hover:text-white hover:bg-dark-border"
+                  } ${isMinimized ? "justify-center" : ""}`
                 }
+                title={isMinimized ? item.label : undefined}
               >
                 <Icon />
-                {!menuCollapsed && <span className="text-sm">{item.text}</span>}
+                {!isMinimized && <span className="text-sm">{item.label}</span>}
               </NavLink>
             );
           })}
@@ -262,18 +264,18 @@ export default function AdminLayout() {
         {/* User Info */}
         <div className="p-4 border-t border-dark-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-purple-400 font-medium">
+            <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-blue-400 font-medium">
                 {getInitial(user?.nome, user?.email)}
               </span>
             </div>
-            {!menuCollapsed && (
+            {!isMinimized && (
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">
-                  {user?.nome || "Admin"}
+                  {user?.nome || user?.email || "Fornecedor"}
                 </p>
                 <p className="text-xs text-gray-400 truncate">
-                  {user?.email || "admin@central.com"}
+                  {user?.email || "fornecedor@central.com"}
                 </p>
               </div>
             )}
@@ -282,13 +284,13 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 overflow-auto flex flex-col">
         {/* Header */}
-        <header className="h-16 bg-dark-surface border-b border-dark-border flex items-center justify-between px-6">
-          <span className="text-sm text-gray-400">Painel Administrativo</span>
+        <header className="h-16 bg-dark-surface border-b border-dark-border flex items-center justify-between px-8">
+          <span className="text-sm text-gray-400">Painel do Fornecedor</span>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => navigate("/admin/configuracoes")}
+              onClick={() => navigate("/fornecedor/configuracoes")}
               className="p-2 text-gray-400 hover:text-white hover:bg-dark-border rounded-lg transition-colors"
               title="Configurações"
             >
@@ -300,8 +302,8 @@ export default function AdminLayout() {
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="flex items-center gap-2 p-2 hover:bg-dark-bg rounded-lg transition-colors"
               >
-                <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
-                  <span className="text-purple-400 text-sm font-medium">
+                <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <span className="text-blue-400 text-sm font-medium">
                     {getInitial(user?.nome, user?.email)}
                   </span>
                 </div>
@@ -323,10 +325,10 @@ export default function AdminLayout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-8">
           <Outlet context={{ addToast }} />
-        </main>
-      </div>
+        </div>
+      </main>
 
       {/* Toast */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />

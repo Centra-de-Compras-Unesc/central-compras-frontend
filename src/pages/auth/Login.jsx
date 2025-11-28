@@ -33,15 +33,22 @@ const Login = () => {
         throw new Error(data.message || "Falha ao realizar login");
       }
 
-      // Atualiza contexto global
-      login({ token: data.token });
+      // Atualiza contexto global (passa token e perfil)
+      await login({ token: data.token, perfil: data.perfil });
 
-      console.log("Login bem-sucedido:", data);
 
-      // Redireciona após login
-      navigate("/loja/dashboard", { replace: true });
+      // Redireciona baseado no perfil
+      const perfil = data.perfil || "loja";
+      let redirectPath = "/loja/dashboard";
+
+      if (perfil === "admin") {
+        redirectPath = "/admin";
+      } else if (perfil === "fornecedor") {
+        redirectPath = "/fornecedor";
+      }
+
+      navigate(redirectPath, { replace: true });
     } catch (err) {
-      console.error("Erro no login:", err);
       setError(err.message);
     }
   };

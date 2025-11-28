@@ -82,7 +82,6 @@ export default function ProdutosDoFornecedorModal({ open, onClose, fornecedor })
 
         if (!cancelado) setTodosProdutos(mapeados);
       } catch (e) {
-        console.error("Erro ao carregar produtos do fornecedor:", e);
         if (!cancelado) setErro("Não foi possível carregar os produtos.");
       } finally {
         if (!cancelado) setCarregando(false);
