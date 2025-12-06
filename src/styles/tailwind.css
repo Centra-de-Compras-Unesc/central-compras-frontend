@@ -1,0 +1,210 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animações de fundo */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.animated-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(-45deg, #111118, #1a1a2e, #16213e, #0f3460);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.animated-bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.animated-bg-blob-1 {
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 69, 0, 0.1);
+  top: -100px;
+  left: -100px;
+  animation: float 8s ease-in-out infinite;
+}
+
+.animated-bg-blob-2 {
+  width: 250px;
+  height: 250px;
+  background: rgba(30, 144, 255, 0.1);
+  bottom: -50px;
+  right: -50px;
+  animation: float 10s ease-in-out infinite;
+}
+
+.animated-bg-blob-3 {
+  width: 200px;
+  height: 200px;
+  background: rgba(0, 255, 127, 0.1);
+  top: 50%;
+  right: -100px;
+  animation: float 12s ease-in-out infinite;
+}
+
+.recharts-wrapper {
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+@layer base {
+  html.dark-mode {
+    background-color: #0a0a0f !important;
+    color: #e5e7eb !important;
+  }
+
+  html.dark-mode body {
+    background-color: #0a0a0f !important;
+    color: #e5e7eb !important;
+  }
+
+  body {
+    @apply bg-[#0a0a0f] text-gray-100;
+  }
+
+  html.light-mode {
+    @apply bg-white text-gray-900;
+    background-color: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  html.light-mode body {
+    @apply bg-gray-50 text-gray-900;
+    background-color: #f9fafb !important;
+    color: #111827 !important;
+  }
+
+  html.light-mode * {
+    color-scheme: light !important;
+  }
+
+  html.light-mode button,
+  html.light-mode a,
+  html.light-mode input,
+  html.light-mode select,
+  html.light-mode textarea {
+    background-color: inherit;
+  }
+
+  html.light-mode .dark\:bg-dark-bg,
+  html.light-mode [class*="bg-\["],
+  html.light-mode [class*="bg-dark"] {
+    @apply bg-white text-gray-900;
+  }
+
+  html.light-mode .dark\:text-dark-text {
+    @apply text-gray-900;
+  }
+
+  html.light-mode .dark\:border-dark-border {
+    @apply border-gray-300;
+  }
+
+  html.light-mode [class*="bg-\[#"]:not(.bg-orange) {
+    @apply bg-white text-gray-900;
+  }
+
+  html.light-mode [class*="border-"] {
+    @apply border-gray-300;
+  }
+}
+
+@layer components {
+  .sidebar-item {
+    @apply flex items-center space-x-2 px-4 py-2 text-dark-text hover:bg-dark-surface rounded-lg transition-colors;
+  }
+
+  .sidebar-item.active {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .card {
+    @apply bg-dark-surface border border-dark-border rounded-lg p-4;
+  }
+
+  html.light-mode .card {
+    @apply bg-white border-gray-300 text-gray-900;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors;
+  }
+
+  .input-dark {
+    @apply bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-dark-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+
+  html.light-mode .input-dark {
+    @apply bg-white border-gray-300 text-gray-900;
+  }
+
+  html.compact-mode {
+    --compact-spacing: 0.5rem;
+  }
+
+  html.sem-efeitos * {
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  html.sem-animacoes * {
+    @apply !animate-none !transition-none;
+  }
+}
+
+html.light-mode [class*="bg-\[#111118\]"],
+html.light-mode [class*="bg-\[#15151c\]"],
+html.light-mode [class*="bg-\[#1b1c22\]"] {
+  @apply bg-white !important;
+  border-color: #e5e7eb !important;
+  color: #111827 !important;
+}
+
+html.light-mode [class*="text-white"],
+html.light-mode [class*="text-gray-400"],
+html.light-mode [class*="text-gray-300"] {
+  @apply text-gray-900;
+}
+
+html.light-mode [class*="text-gray-500"] {
+  @apply text-gray-700;
+}
